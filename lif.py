@@ -22,7 +22,7 @@ V_spike = 0.5                 # spike delta (V)
 ## iterate over each time step
 for i, t in enumerate(time):
     if t > t_rest:
-        I = (math.sin(t / 10) + 1) * 3
+        I = (math.sin(t / 50) + 1)
         Vm[i] = Vm[i-1] + (-Vm[i-1] + I*Rm) / tau_m * dt
         if Vm[i] >= Vth:
             Vm[i] += V_spike
