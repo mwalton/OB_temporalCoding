@@ -2,7 +2,7 @@ from numpy import *
 from pylab import *
 
 ## setup parameters and state variables
-T       = 1000                  # total time to simulate (msec)
+T       = 200                  # total time to simulate (msec)
 dt      = 0.125               # simulation time step (msec)
 time    = arange(0, T+dt, dt) # time array
 t_rest  = 0                   # initial refractory time
@@ -15,14 +15,13 @@ tau_m   = Rm*Cm               # time constant (msec)
 tau_ref = 4                   # refractory period (msec)
 Vth     = 1                   # spike threshold (V)
 V_spike = 0.5                 # spike delta (V)
-
+I = 1.5
 ## Input stimulus
 #I       = 1.5                 # input current (A)
 
 ## iterate over each time step
 for i, t in enumerate(time):
     if t > t_rest:
-        I = (math.sin(t / 50) + 1)
         Vm[i] = Vm[i-1] + (-Vm[i-1] + I*Rm) / tau_m * dt
         if Vm[i] >= Vth:
             Vm[i] += V_spike
