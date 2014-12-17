@@ -118,7 +118,7 @@ plt.show()
 ## plot membrane potential trace  
 pl.figure(3)
 plt.plot(time, Vm)
-plt.title('Leaky Integrate-and-Fire Example')
+plt.title('Mitral Cell [0] (LIF)')
 plt.ylabel('Membrane Potential (V)')
 plt.xlabel('Time (msec)')
 plt.ylim([0,2])
