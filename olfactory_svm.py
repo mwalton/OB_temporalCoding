@@ -29,9 +29,9 @@ dataFolder = "data/Otrain_4Otest/" #folders: Otrain_4Otest, OBGtrain_4OBGtest, O
 target_names = ['odorant 0', 'odorant 1', 'odorant 2', 'odorant 3']
 
 addNoise = False
-doRsa = True
+doRsa = False
 standardize = True
-parameterEstimation = 'random' #options: none, exhaustive, random, fixed_range
+parameterEstimation = 'none' #options: none, exhaustive, random, fixed_range
 rand_iter = 10 #number of samples in the parameter space to sample in random estimation mode
 
 ###############################################################################
