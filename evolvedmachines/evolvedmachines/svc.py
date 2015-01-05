@@ -4,18 +4,12 @@ Created on Fri Nov 21 16:41:42 2014
 
 @author: michaelwalton
 """
-
-#this is set up as a multiclass problem, could maybe modify to a multilabel
-#problem and then treat the p(label) as a prediciton / reproduction of the
-#odorant concentration, this would be really cool if that representation works
-
-import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import pylab as pl
 import scipy as sp
-import rsa.RSA as RSA
 
+from data import olfactoryDataset
 from sklearn import svm
 from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import StratifiedKFold
@@ -25,58 +19,37 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
 
-dataFolder = "data/Otrain_4Otest/" #folders: Otrain_4Otest, OBGtrain_4OBGtest, Otrain_4OBGtest
+dataFolder = "../data/Otrain_4Otest/" #folders: Otrain_4Otest, OBGtrain_4OBGtest, Otrain_4OBGtest
 target_names = ['odorant 0', 'odorant 1', 'odorant 2', 'odorant 3']
 
 addNoise = False
-doRsa = False
 standardize = True
 parameterEstimation = 'none' #options: none, exhaustive, random, fixed_range
 rand_iter = 10 #number of samples in the parameter space to sample in random estimation mode
 
 ###############################################################################
 #load data
-reader = csv.reader(open(dataFolder + "train_c.csv","rb"), delimiter=",")
-x = list(reader)
-train_c = np.array(x).astype('float')
-
-reader = csv.reader(open(dataFolder + "train_a.csv","rb"), delimiter=",")
-x = list(reader)
-train_a = np.array(x).astype('float')
-
-reader = csv.reader(open(dataFolder + "test_c.csv","rb"), delimiter=",")
-x = list(reader)
-test_c = np.array(x).astype('float')
-
-reader = csv.reader(open(dataFolder + "test_a.csv","rb"), delimiter=",")
-x = list(reader)
-test_a = np.array(x).astype('float')
+data = olfactoryDataset()
+data.load(dataFolder)
 
 ###############################################################################
 # Convert the concentration labels to classes
-train_target = np.argmax(train_c[:,1:5], axis=1)
-test_target = np.argmax(test_c[:,1:5], axis=1)
+train_target = np.argmax(data.train_c[:,1:5], axis=1)
+test_target = np.argmax(data.test_c[:,1:5], axis=1)
 
 ###############################################################################
 # Add noise to training and test sets
 if (addNoise):
     random_state = np.random.RandomState(0)
     
-    n_samples, n_features = train_a.shape
-    train_a = np.c_[train_a, random_state.randn(n_samples, n_features)]
+    n_samples, n_features = data.train_a.shape
+    train_a = np.c_[data.train_a, random_state.randn(n_samples, n_features)]
     
-    n_samples, n_features = test_a.shape
-    test_a = np.c_[test_a, random_state.randn(n_samples, n_features)]
+    n_samples, n_features = data.test_a.shape
+    test_a = np.c_[data.test_a, random_state.randn(n_samples, n_features)]
 
 ###############################################################################
 # Data Pre-processing
-if (doRsa):
-    rsa = RSA(latencyScale=100, sigmoidRate=False, normalizeSpikes=True,
-                 maxLatency=1000, maxSpikes=20)
-                 
-    train_a = rsa.countNspikes(train_a)
-    test_a = rsa.countNspikes(test_a)
-
 if (standardize):
     scaler = StandardScaler()
     train_a = scaler.fit_transform(train_a)
@@ -141,7 +114,7 @@ pred = clf.predict(test_a)
 
 #plot imported data and target
 pl.figure(1)
-plt.plot(train_c)
+plt.plot(data.train_c)
 plt.title('Training (Odorant Concentration)')
 plt.yscale('log')
 plt.ylim(1e-4, 1)
@@ -150,7 +123,7 @@ plt.xlabel('Time')
 plt.show()
 
 pl.figure(2)
-plt.plot(test_c)
+plt.plot(data.test_c)
 plt.title('Testing (Odorant Concentration)')
 plt.yscale('log')
 plt.ylim(1e-4, 1)
