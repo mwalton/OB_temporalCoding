@@ -18,6 +18,7 @@ for n in xrange(400):
         
 tstdata, trndata = alldata.splitWithProportion( 0.25 )
 
+
 trndata._convertToOneOfMany( )
 tstdata._convertToOneOfMany( )
 
