@@ -13,6 +13,9 @@ from sklearn.cross_validation import StratifiedKFold
 from sklearn.grid_search import GridSearchCV
 from sklearn.grid_search import RandomizedSearchCV
 
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
+
 """
 parameterEstimation options: none, exhaustive, random, fixed_range
 rand_iter: number of samples in the parameter space to sample in random estimation mode
@@ -32,7 +35,7 @@ class SVC:
             self.data.standardize()
     
     def predict(self):
-        self.clf.predict(self.data.test_a)
+        self.pred = self.clf.predict(self.data.test_a)
     
     def fit(self, parameterEstimation = 'none', rand_iter=10):
         if (parameterEstimation == 'none'):
@@ -64,7 +67,7 @@ class SVC:
                                   class_weight=class_weight_range)
                 
                 grid = RandomizedSearchCV(svm.SVC(), param_distributions=param_dist,
-                                          cv=cv, n_iter=self.rand_iter)
+                                          cv=cv, n_iter=rand_iter)
                 
             elif(parameterEstimation == 'fixed_range'):
                 #exhaustive search on an explictly defined dictionary of params
@@ -81,5 +84,11 @@ class SVC:
             for params, mean_score, scores in grid.grid_scores_:
                 print("%0.3f (+/-%0.03f) for %r" % (mean_score, scores.std() / 2, params))
         
-            print("Best Estimator: %s" % grid.best_estimator_)
             self.clf = grid.best_estimator_
+            
+    def classification_report(self):
+        return classification_report(self.data.test_target, self.pred, target_names=self.target_names)
+    
+    def accuracy_score(self):
+        return accuracy_score(self.data.test_target, self.pred)
+        
