@@ -30,7 +30,6 @@ import numpy
 import theano
 import theano.tensor as T
 
-
 from logistic_sgd import LogisticRegression, load_data
 
 
