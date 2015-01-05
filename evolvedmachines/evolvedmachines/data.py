@@ -7,7 +7,8 @@ Created on Jan 5, 2015
 import numpy as np
 import csv
 from sklearn.preprocessing import StandardScaler
-from pybrain.datasets.supervised import SupervisedDataSet
+#from pybrain.datasets.supervised import SupervisedDataSet
+from pybrain.datasets.classification import ClassificationDataSet
 
 class olfactoryDataset:
     def __init__(self):
@@ -35,15 +36,13 @@ class olfactoryDataset:
         self.test_target = np.argmax(self.test_c[:,1:5], axis=1)
         
         # store as single datasets (needed for pybrain)
-        self.train_dataset = SupervisedDataSet(self.train_a.shape[1], self.train_target.shape[0])
-        self.train_dataset.setField('input', np.transpose(self.train_a))
-        self.train_dataset.setField('target', self.train_target)
+        self.train_dataset = ClassificationDataSet(self.train_a.shape[1], 1, nb_classes=4)
+        self.train_dataset.setField('input', self.train_a)
+        self.train_dataset.setField('target', self.train_c)
         
-        """
-        self.test_dataset = SupervisedDataSet(self.test_a.shape[1], 1)
-        self.test_dataset.setField('input', self.test_a[:,:])
-        self.test_dataset.setField('target', self.test_target[:])
-        """
+        self.test_dataset = ClassificationDataSet(self.test_a.shape[1], 1, nb_classes=4)
+        self.test_dataset.setField('input', self.test_a)
+        self.test_dataset.setField('target', self.train_c)
     
     def addNoise(self):
         random_state = np.random.RandomState(0)

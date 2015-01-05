@@ -30,6 +30,8 @@ class NN:
             griddata.addSample([X.ravel()[i],Y.ravel()[i]], [0])
         griddata._convertToOneOfMany()  # this is still needed to make the fnn feel comfy
         
+        #self.trainer.trainEpochs(n)
+        
         for i in range(n):
             self.trainer.trainEpochs(1)
             trnresult = percentError( self.trainer.testOnClassData(),
