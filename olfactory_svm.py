@@ -35,12 +35,12 @@ rand_iter = 10 #number of samples in the parameter space to sample in random est
 #Init, load data, fit, optomize (optional), predict
 clf = SVC(addNoise=False, standardize=True)
 clf.loadData(dataFolder)
-clf.fit(parameterEstimation='none', rand_iter=10)
+clf.fit(parameterEstimation='random', rand_iter=10)
 clf.predict()
 
 ###############################################################################
 #PLOT DATA
-
+"""
 #plot imported data and target
 pl.figure(1)
 plt.plot(clf.data.train_c)
@@ -83,7 +83,7 @@ plt.title('SVC')
 plt.ylabel('Target label')
 plt.xlabel('Predicted label')
 plt.show()
-
+"""
 print("\n")
 print(clf.classification_report())
 print("Accuracy Score: %s\n" % clf.accuracy_score())

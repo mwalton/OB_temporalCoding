@@ -26,6 +26,15 @@ class SVC:
         self.standardize = standardize
         self.target_names = ['odorant 0', 'odorant 1', 'odorant 2', 'odorant 3']
     
+    def loadSet(self, train, test):
+        self.data = olfactoryDataset()
+        self.data.loadTraining(train)
+        self.data.loadTesting(test)
+        if (self.addNoise):
+            self.data.addNoise()
+        if (self.standardize):
+            self.data.standardize()
+    
     def loadData(self, folder):
         self.data = olfactoryDataset()
         self.data.load(folder)
