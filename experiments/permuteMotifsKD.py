@@ -31,9 +31,9 @@ def run(dataParentFolder):
             
     pl.figure(0)
     plt.imshow(cells)
-    plt.title('SVC Accuracy Scores')
-    plt.ylabel('Affinities Per Sensor sum(KD < inf)')
-    plt.xlabel('Motifs per Analyte sum(m > 0)')
+    plt.title('SVC Accuracy Score')
+    plt.ylabel('Affinities Per Sensor')
+    plt.xlabel('Motifs per Analyte')
     plt.show()
     
 if __name__ == "__main__":
