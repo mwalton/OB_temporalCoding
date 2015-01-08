@@ -33,9 +33,9 @@ rand_iter = 10 #number of samples in the parameter space to sample in random est
 
 ###############################################################################
 #Init, load data, fit, optomize (optional), predict
-clf = SVC(addNoise=False, standardize=True)
+clf = SVC(addNoise=addNoise, standardize=standardize)
 clf.loadData(dataFolder)
-clf.fit(parameterEstimation='random', rand_iter=10)
+clf.fit(parameterEstimation=parameterEstimation, rand_iter=rand_iter)
 clf.predict()
 
 ###############################################################################

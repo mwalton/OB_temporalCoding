@@ -24,7 +24,7 @@ def run(dataParentFolder):
             test = dataParentFolder + "m" + motifs + "a" + kds + "test/"
             
             clf.loadSet(train, test)
-            clf.fit(parameterEstimation='none', rand_iter=10)
+            clf.fit(parameterEstimation='random', rand_iter=10)
             clf.predict()
             print(clf.classification_report())
             cells[i][j] = clf.accuracy_score()
