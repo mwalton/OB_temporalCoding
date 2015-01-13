@@ -1,4 +1,3 @@
-from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import BernoulliRBM
@@ -7,6 +6,7 @@ from sklearn.pipeline import Pipeline
 import numpy as np
 import argparse
 import time
+from sklearn.metrics import accuracy_score
 #from pandas.rpy.common import load_data
 
 def loadData(XPath, yPath):
@@ -118,7 +118,9 @@ else:
     logistic = LogisticRegression(C = 1.0)
     logistic.fit(trainX, trainY)
     print "LOGISTIC REGRESSION ON ORIGINAL DATASET"
-    print classification_report(testY, logistic.predict(testX))
+    pred = logistic.predict(testX)
+    print classification_report(testY, pred)
+    print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
  
     # initialize the RBM + Logistic Regression classifier with
     # the cross-validated parameters
@@ -130,5 +132,7 @@ else:
     classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
     classifier.fit(trainX, trainY)
     print "RBM + LOGISTIC REGRESSION ON ORIGINAL DATASET"
-    print classification_report(testY, classifier.predict(testX))
+    pred = classifier.predict(testX)
+    print classification_report(testY, pred)
+    print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
 
