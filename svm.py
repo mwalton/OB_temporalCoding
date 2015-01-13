@@ -51,7 +51,10 @@ if args["optomize"] == 1:
     # perform a grid search on the 'C' and 'gamma' parameter
     # of SVM
     print "SEARCHING SVM"
-    params = {"C": [1.0, 10.0, 100.0]}
+    params = [
+              {'C': [1, 10, 100, 1000], 'kernel': ['linear']},
+              {'C': [1, 10, 100, 1000], 'gamma': [0.001, 0.0001], 'kernel': ['rbf']},
+              ]
     start = time.time()
     gs = GridSearchCV(svm.SVC(), params, n_jobs = -1, verbose = 1)
     gs.fit(trainX, trainY)
