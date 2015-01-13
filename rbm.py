@@ -35,7 +35,7 @@ ap.add_argument("-X", "--xTest", required = True,
     help = "path to testing feature set")
 ap.add_argument("-Y", "--yTest", required = True,
     help = "path to testing target set")
-ap.add_argument("-o", "--optomize", type = int, default = 0,
+ap.add_argument("-o", "--optimize", type = int, default = 0,
     help = "whether or not a grid search should be performed")
 ap.add_argument("-m", "--multiClass", type = int, default=1,
     help = "exclusive multi class or regression")
@@ -53,7 +53,7 @@ if (args["multiClass"] == 1):
     testY = convertToClasses(testY)
 
 # check to see if a grid search should be done
-if args["optomize"] == 1:
+if args["optimize"] == 1:
     # perform a grid search on the 'C' parameter of Logistic
     # Regression
     print "SEARCHING LOGISTIC REGRESSION"
