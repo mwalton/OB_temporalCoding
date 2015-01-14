@@ -40,11 +40,13 @@ ap.add_argument("-X", "--xTest", required = True,
 ap.add_argument("-Y", "--yTest", required = True,
     help = "path to testing target set")
 ap.add_argument("-o", "--optimize", type = int, default = 0,
-    help = "whether or not a grid search should be performed")
+    help = "optomization mode: 0 use default, 1 optomize, 2 use pkl model if possible")
 ap.add_argument("-m", "--multiClass", type = int, default=1,
     help = "exclusive multi class or regression")
 ap.add_argument("-p", "--pickle", default="models/rbmModel.pkl",
     help = "pickle dump of model (output if optomize = 1, input if optomize = 0)")
+ap.add_argument("-v", "--visualize", type=int, default=0,
+    help = "whether or not to show visualizations after a run")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -136,7 +138,7 @@ else:
     # initialize the RBM + Logistic Regression classifier with
     # the cross-validated parameters
     
-    if (os.path.isfile(args["pickle"])):
+    if (os.path.isfile(args["pickle"]) and args["optimize"] == 2):
         print("Loading model: %s" % args["pickle"])
         classifier = joblib.load(args["pickle"])
     else:
@@ -154,4 +156,5 @@ else:
     print classification_report(testY, pred)
     print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
 
-    plot.accuracy(testY, pred)
+    if (args["visualize"] == 1):
+        plot.accuracy(testY, pred, "RBM")

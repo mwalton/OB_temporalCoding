@@ -1,10 +1,12 @@
 #!/bin/sh
 
-path=data/Otrain_4Otest
-xTrain=train_a.csv
-yTrain=train_c.csv
-xTest=test_a.csv
-yTest=test_c.csv
+emNSpath=tstepAccuracy.csv
 
-python rbm.py --xTrain $path/$xTrain --yTrain $path/$yTrain --xTest $path/$xTest --yTest $path/$yTest --optimize 1
-python svm.py --xTrain $path/$xTrain --yTrain $path/$yTrain --xTest $path/$xTest --yTest $path/$yTest --optimize 1
+path=data/Otrain_4Otest
+xTrain=$path/train_a.csv
+yTrain=$path/train_c.csv
+xTest=$path/test_a.csv
+yTest=$path/test_c.csv
+
+python svm.py --xTrain $xTrain --yTrain $yTrain --xTest $xTest --yTest $yTest --optimize 1 --visualize 0
+python rbm.py --xTrain $xTrain --yTrain $yTrain --xTest $xTest --yTest $yTest --optimize 1 --visualize 0
