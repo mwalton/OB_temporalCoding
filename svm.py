@@ -1,5 +1,6 @@
 import numpy as np
 import argparse
+import os.path
 from sklearn.preprocessing import StandardScaler
 from sklearn.grid_search import GridSearchCV
 import time
@@ -92,11 +93,17 @@ if args["optimize"] == 1:
 # otherwise, use the manually specified parameters
 else:
     # evaluate using SVM
-    clf = joblib.load(args["pickle"])
+    if (os.path.isfile(args["pickle"])):
+        clf = joblib.load(args["pickle"])
+    else:
+        clf = svm.SVC()
+        
     clf.fit(trainX, trainY)
     
     print "SVM ON ORIGINAL DATASET"
     pred = clf.predict(testX)
     print classification_report(testY, pred)
     print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
+    
+    np.save(args["npFolder"] + "svmPred", pred)
 

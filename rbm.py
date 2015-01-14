@@ -3,6 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import BernoulliRBM
 from sklearn.grid_search import GridSearchCV
 from sklearn.pipeline import Pipeline
+import os.path
 import numpy as np
 import argparse
 import time
@@ -42,6 +43,8 @@ ap.add_argument("-m", "--multiClass", type = int, default=1,
     help = "exclusive multi class or regression")
 ap.add_argument("-p", "--pickle", default="models/rbmModel.pkl",
     help = "pickle dump of model (output if optomize = 1, input if optomize = 0)")
+ap.add_argument("-n", "--npFolder", default="npy/",
+    help = "target folder for writing serialized numpy output")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -111,6 +114,9 @@ if args["optimize"] == 1:
         
     print("Accuracy Score on Validation Set: %s\n" % accuracy_score(testY, gs.predict(testX)))
  
+    # pickle this model so we can use it later
+    joblib.dump(gs.best_estimator_, args["pickle"])
+    
     # show a reminder message
     print "\nIMPORTANT"
     print "Now that your parameters have been searched, manually set"
@@ -129,15 +135,22 @@ else:
  
     # initialize the RBM + Logistic Regression classifier with
     # the cross-validated parameters
-    rbm = BernoulliRBM(n_components = 200, n_iter = 40,
+    
+    if (os.path.isfile(args["pickle"])):
+        classifier = joblib.load(args["pickle"])
+    else:
+        rbm = BernoulliRBM(n_components = 200, n_iter = 40,
         learning_rate = 0.01,  verbose = True)
-    logistic = LogisticRegression(C = 1.0)
+        logistic = LogisticRegression(C = 1.0)
+        classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
  
     # train the classifier and show an evaluation report
-    classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
+    
     classifier.fit(trainX, trainY)
     print "RBM + LOGISTIC REGRESSION ON ORIGINAL DATASET"
     pred = classifier.predict(testX)
     print classification_report(testY, pred)
     print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
+    
+    np.save(args["npFolder"] + "rbmPred", pred)
 
