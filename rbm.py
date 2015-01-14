@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 import time
 from sklearn.metrics import accuracy_score
+from sklearn.externals import joblib
 #from pandas.rpy.common import load_data
 
 def loadData(XPath, yPath):
@@ -39,6 +40,8 @@ ap.add_argument("-o", "--optimize", type = int, default = 0,
     help = "whether or not a grid search should be performed")
 ap.add_argument("-m", "--multiClass", type = int, default=1,
     help = "exclusive multi class or regression")
+ap.add_argument("-p", "--pickle", default="models/rbmModel.pkl",
+    help = "pickle dump of model (output if optomize = 1, input if optomize = 0)")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -91,7 +94,7 @@ if args["optimize"] == 1:
  
     # perform a grid search over the parameter
     start = time.time()
-    gs = GridSearchCV(classifier, params, n_jobs = -1, verbose = 1)
+    gs = GridSearchCV(classifier, params, n_jobs = -1, verbose = 2)
     gs.fit(trainX, trainY)
  
     # print diagnostic information to the user and grab the
@@ -105,6 +108,8 @@ if args["optimize"] == 1:
     # so they can be manually set
     for p in sorted(params.keys()):
         print "\t %s: %f" % (p, bestParams[p])
+        
+    print("Accuracy Score on Validation Set: %s\n" % accuracy_score(testY, gs.predict(testX)))
  
     # show a reminder message
     print "\nIMPORTANT"
