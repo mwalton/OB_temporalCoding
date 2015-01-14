@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 import os.path
+import plots as plot
 from sklearn.preprocessing import StandardScaler
 from sklearn.grid_search import GridSearchCV
 import time
@@ -100,10 +101,9 @@ else:
         
     clf.fit(trainX, trainY)
     
-    print "SVM ON ORIGINAL DATASET"
+    print "SVM PERFORMANCE"
     pred = clf.predict(testX)
     print classification_report(testY, pred)
     print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
-    
-    np.save(args["npFolder"] + "svmPred", pred)
 
+    plot.accuracy(testY, pred)

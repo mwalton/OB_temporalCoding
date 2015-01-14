@@ -9,6 +9,8 @@ import argparse
 import time
 from sklearn.metrics import accuracy_score
 from sklearn.externals import joblib
+import plots as plot
+from blz.tests.common import verbose
 #from pandas.rpy.common import load_data
 
 def loadData(XPath, yPath):
@@ -43,8 +45,6 @@ ap.add_argument("-m", "--multiClass", type = int, default=1,
     help = "exclusive multi class or regression")
 ap.add_argument("-p", "--pickle", default="models/rbmModel.pkl",
     help = "pickle dump of model (output if optomize = 1, input if optomize = 0)")
-ap.add_argument("-n", "--npFolder", default="npy/",
-    help = "target folder for writing serialized numpy output")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -128,29 +128,30 @@ else:
     # features (these parameters were cross-validated)
     logistic = LogisticRegression(C = 1.0)
     logistic.fit(trainX, trainY)
-    print "LOGISTIC REGRESSION ON ORIGINAL DATASET"
+    print "LOGISTIC REGRESSION PERFORMANCE"
     pred = logistic.predict(testX)
     print classification_report(testY, pred)
-    print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
+    print("Accuracy Score: %s\n" % accuracy_score(testY, pred)) 
  
     # initialize the RBM + Logistic Regression classifier with
     # the cross-validated parameters
     
     if (os.path.isfile(args["pickle"])):
+        print("Loading model: %s" % args["pickle"])
         classifier = joblib.load(args["pickle"])
     else:
+        print("Creating new model with default parameters")
         rbm = BernoulliRBM(n_components = 200, n_iter = 40,
-        learning_rate = 0.01,  verbose = True)
+        learning_rate = 0.01)
         logistic = LogisticRegression(C = 1.0)
         classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
  
     # train the classifier and show an evaluation report
     
     classifier.fit(trainX, trainY)
-    print "RBM + LOGISTIC REGRESSION ON ORIGINAL DATASET"
+    print "RBM + LOGISTIC REGRESSION PERFORMANCE"
     pred = classifier.predict(testX)
     print classification_report(testY, pred)
     print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
-    
-    np.save(args["npFolder"] + "rbmPred", pred)
 
+    plot.accuracy(testY, pred)
