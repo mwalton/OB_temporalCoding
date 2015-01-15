@@ -1,5 +1,4 @@
 #datasets
-*.csv
 
 #eclipse / pydev
 *.project
