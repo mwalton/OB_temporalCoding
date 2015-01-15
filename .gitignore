@@ -1,3 +1,6 @@
+#datasets
+*.csv
+
 #eclipse / pydev
 *.project
 *.pydevproject
