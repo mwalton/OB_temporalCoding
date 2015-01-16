@@ -113,11 +113,13 @@ if args["optimize"] == 1:
     # so they can be manually set
     for p in sorted(params.keys()):
         print "\t %s: %f" % (p, bestParams[p])
-        
-    print("Accuracy Score on Validation Set: %s\n" % accuracy_score(testY, gs.predict(testX)))
+    
+    clf = gs.best_estimator_    
+    clf.fit(trainX, trainY)
+    print("Accuracy Score on Validation Set: %s\n" % accuracy_score(testY, clf.predict(testX)))
  
     # pickle this model so we can use it later
-    joblib.dump(gs.best_estimator_, args["pickle"])
+    joblib.dump(clf, args["pickle"])
     
     # show a reminder message
     print "\nIMPORTANT"
@@ -150,7 +152,7 @@ else:
  
     # train the classifier and show an evaluation report
     
-    classifier.fit(trainX, trainY)
+    #classifier.fit(trainX, trainY)
     print "RBM + LOGISTIC REGRESSION PERFORMANCE"
     pred = classifier.predict(testX)
     print classification_report(testY, pred)
