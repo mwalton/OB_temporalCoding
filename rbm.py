@@ -171,3 +171,4 @@ else:
 
     if (args["visualize"] == 1):
         plot.accuracy(testY, pred, "RBM", c=testC)
+        plot.show()

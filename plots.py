@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from Image import NEAREST
 from matplotlib.cm import cmap_d
+
 import numpy as np
 #import pylab as pl
 
@@ -29,4 +30,7 @@ def accuracy(target, prediction, label="Classifier", c=np.zeros((0,0))):
         ax3.plot(c)
         ax3.set_title("Concentration")
     
+    plt.draw()
+    
+def show():
     plt.show()

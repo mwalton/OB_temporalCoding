@@ -39,4 +39,5 @@ print("Accuracy Score: %s\n" % accuracy_score(target, f_pred))
 if (args["visualize"] == 1):
     plot.accuracy(target, ctx_pred, label="Cortex", c=c)
     plot.accuracy(target, f_pred, label="Fibers", c=c)
+    plot.show()
 
