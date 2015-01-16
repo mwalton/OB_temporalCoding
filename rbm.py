@@ -39,11 +39,11 @@ ap.add_argument("-X", "--xTest", required = True,
     help = "path to testing feature set")
 ap.add_argument("-Y", "--yTest", required = True,
     help = "path to testing target set")
-ap.add_argument("-o", "--optimize", type = int, default = 0,
+ap.add_argument("-o", "--optimize", default = 'none',
     help = "optomization mode: 0 use default, 1 optomize, 2 use pkl model if possible")
 ap.add_argument("-m", "--multiClass", type = int, default=1,
     help = "exclusive multi class or regression")
-ap.add_argument("-p", "--pickle", default="models/rbmModel.pkl",
+ap.add_argument("-p", "--pickle", default="model/rbmModel.pkl",
     help = "pickle dump of model (output if optomize = 1, input if optomize = 0)")
 ap.add_argument("-v", "--visualize", type=int, default=0,
     help = "whether or not to show visualizations after a run")
@@ -56,12 +56,14 @@ args = vars(ap.parse_args())
 trainX = scale(trainX)
 testX = scale(testX)
 
+testC = testY
+
 if (args["multiClass"] == 1):
     trainY = convertToClasses(trainY)
     testY = convertToClasses(testY)
 
 # check to see if a grid search should be done
-if args["optimize"] == 1:
+if args["optimize"] == "gs":
     # perform a grid search on the 'C' parameter of Logistic
     # Regression
     print "SEARCHING LOGISTIC REGRESSION"
@@ -118,6 +120,10 @@ if args["optimize"] == 1:
     clf.fit(trainX, trainY)
     print("Accuracy Score on Validation Set: %s\n" % accuracy_score(testY, clf.predict(testX)))
  
+    #make the 'model' folder if its not there
+    if(not os.path.exists(args["pickle"].split('/')[0])):
+        os.makedirs(args["pickle"].split('/')[0])
+        
     # pickle this model so we can use it later
     joblib.dump(clf, args["pickle"])
     
@@ -140,15 +146,20 @@ else:
     # initialize the RBM + Logistic Regression classifier with
     # the cross-validated parameters
     
-    if (os.path.isfile(args["pickle"]) and args["optimize"] == 2):
+    if (os.path.isfile(args["pickle"]) and args["optimize"] == "load"):
         print("Loading model: %s" % args["pickle"])
         classifier = joblib.load(args["pickle"])
+    elif (os.path.isfile(args["pickle"]) and args["optimize"] == "refit"):
+        print("Loading model: %s" % args["pickle"])
+        classifier = joblib.load(args["pickle"])
+        classifier.fit(trainX, trainY)
     else:
         print("Creating new model with default parameters")
         rbm = BernoulliRBM(n_components = 200, n_iter = 40,
         learning_rate = 0.01)
         logistic = LogisticRegression(C = 1.0)
         classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
+        classifier.fit(trainX, trainY)
  
     # train the classifier and show an evaluation report
     
@@ -159,4 +170,4 @@ else:
     print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
 
     if (args["visualize"] == 1):
-        plot.accuracy(testY, pred, "RBM")
+        plot.accuracy(testY, pred, "RBM", c=testC)
