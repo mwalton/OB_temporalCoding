@@ -17,7 +17,6 @@ def accuracy(target, prediction, label="Classifier", c=np.zeros((0,0))):
     else:
         fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(6,8))
     
-    #show confusion matrix
     dim = [0,compare.shape[1],0,compare.shape[0]]
     ax1.imshow(compare, extent=dim, aspect='auto', interpolation='nearest')
     ax1.set_title(label + ": Prediction vs. Target")
@@ -29,6 +28,8 @@ def accuracy(target, prediction, label="Classifier", c=np.zeros((0,0))):
     if (showC):
         ax3.plot(c)
         ax3.set_title("Concentration")
+        ax3.set_yscale('log')
+        ax3.set_ylim(0.02,0.7)
     
     plt.draw()
     

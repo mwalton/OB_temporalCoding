@@ -11,6 +11,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.externals import joblib
 import plots as plot
 from blz.tests.common import verbose
+from sklearn.preprocessing import StandardScaler
 #from pandas.rpy.common import load_data
 
 def loadData(XPath, yPath):
@@ -29,6 +30,132 @@ def scale(X, eps = 0.00001):
 def convertToClasses(targetVector):
     return np.argmax(targetVector[:,1:5], axis=1)
 
+def doLogisticRegression(trainX, trainY, testX, testY, optimize, pklFolder):
+    picklePath = os.path.join(pklFolder,"logitModel.pkl")
+    if (optimize=="gs"):
+        # perform a grid search on the 'C' parameter of Logistic
+        # Regression
+        print "SEARCHING LOGISTIC REGRESSION HYPERPARAMS"
+        params = {"C": [1.0, 10.0, 100.0]}
+        start = time.time()
+        gs = GridSearchCV(LogisticRegression(), params, n_jobs = -1, verbose = 1)
+        gs.fit(trainX, trainY)
+     
+        # print diagnostic information to the user and grab the
+        # best model
+        print "done in %0.3fs" % (time.time() - start)
+        print "best score: %0.3f" % (gs.best_score_)
+        print "LOGISTIC REGRESSION PARAMETERS"
+        bestParams = gs.best_estimator_.get_params()
+     
+        # loop over the parameters and print each of them out
+        # so they can be manually set
+        for p in sorted(params.keys()):
+            print "\t %s: %f" % (p, bestParams[p])
+            
+        logistic = gs.best_estimator_
+        
+        #make the 'model' folder if its not there
+        if(not os.path.exists(pklFolder)):
+            os.makedirs(pklFolder)
+            
+        # pickle this model so we can use it later
+        joblib.dump(logistic, picklePath)
+        
+    elif (os.path.isfile(picklePath) and args["optimize"] == "load"):
+        print("Loading model: %s" % picklePath)
+        logistic = joblib.load(picklePath)
+    elif (os.path.isfile(picklePath) and args["optimize"] == "refit"):
+        print("Loading model: %s and refitting" % picklePath)
+        logistic = joblib.load(picklePath)
+        logistic.fit(trainX, trainY)
+    
+    else:
+        print("Creating new Logit model with default parameters")
+        logistic = LogisticRegression(C = 1.0)
+        logistic.fit(trainX, trainY)
+        
+        #make the 'model' folder if its not there
+        if(not os.path.exists(pklFolder)):
+            os.makedirs(pklFolder)
+            
+        # pickle this model so we can use it later
+        joblib.dump(logistic, picklePath)
+        
+    return logistic.predict(testX)
+        
+def doRBM(trainX, trainY, testX, testY, optimize, pklFolder):
+    picklePath = os.path.join(pklFolder,"rbmModel.pkl")
+    
+    if (optimize=="gs"):
+        # initialize the RBM + Logistic Regression pipeline
+        rbm = BernoulliRBM(n_components = 200, n_iter = 40,
+        learning_rate = 0.01)
+        logistic = LogisticRegression(C = 1.0)
+        classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
+     
+        # perform a grid search on the learning rate, number of
+        # iterations, and number of components on the RBM and
+        # C for Logistic Regression
+        print "SEARCHING RBM HYPERPARAMS"
+        params = {
+            "rbm__learning_rate": [0.1, 0.01, 0.001],
+            "rbm__n_iter": [20, 40, 80],
+            "rbm__n_components": [50, 100, 200],
+            "logistic__C": [1.0, 10.0, 100.0]}
+     
+        # perform a grid search over the parameter
+        start = time.time()
+        gs = GridSearchCV(classifier, params, n_jobs = -1, verbose = 2)
+        gs.fit(trainX, trainY)
+     
+        # print diagnostic information to the user and grab the
+        # best model
+        print "\ndone in %0.3fs" % (time.time() - start)
+        print "best score: %0.3f" % (gs.best_score_)
+        print "RBM PARAMETERS"
+        bestParams = gs.best_estimator_.get_params()
+     
+        # loop over the parameters and print each of them out
+        # so they can be manually set
+        for p in sorted(params.keys()):
+            print "\t %s: %f" % (p, bestParams[p])
+        
+        clf = gs.best_estimator_    
+        #clf.fit(trainX, trainY)
+        #print("Accuracy Score on Validation Set: %s\n" % accuracy_score(testY, best.predict(testX)))
+     
+        #make the 'model' folder if its not there
+        if(not os.path.exists(pklFolder)):
+            os.makedirs(pklFolder)
+            
+        # pickle this model so we can use it later
+        joblib.dump(clf, picklePath)
+        
+    elif (os.path.isfile(picklePath) and args["optimize"] == "load"):
+        print("Loading model: %s" % picklePath)
+        clf = joblib.load(picklePath)
+    elif (os.path.isfile(picklePath) and args["optimize"] == "refit"):
+        print("Loading model: %s and refitting" % picklePath)
+        clf = joblib.load(picklePath)
+        clf.fit(trainX, trainY)
+    else:
+        print("Creating new RBM with default parameters")
+        rbm = BernoulliRBM(n_components = 200, n_iter = 40,
+        learning_rate = 0.01)
+        logistic = LogisticRegression(C = 1.0)
+        clf = Pipeline([("rbm", rbm), ("logistic", logistic)])
+        clf.fit(trainX, trainY)
+        
+        #make the 'model' folder if its not there
+        if(not os.path.exists(pklFolder)):
+            os.makedirs(pklFolder)
+            
+        # pickle this model so we can use it later
+        joblib.dump(clf, picklePath)
+        
+    return clf.predict(testX)
+        
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-x", "--xTrain", required = True,
@@ -43,10 +170,12 @@ ap.add_argument("-o", "--optimize", default = 'none',
     help = "optomization mode: 0 use default, 1 optomize, 2 use pkl model if possible")
 ap.add_argument("-m", "--multiClass", type = int, default=1,
     help = "exclusive multi class or regression")
-ap.add_argument("-p", "--pickle", default="model/rbmModel.pkl",
+ap.add_argument("-p", "--pickle", default="model",
     help = "pickle dump of model (output if optomize = 1, input if optomize = 0)")
 ap.add_argument("-v", "--visualize", type=int, default=0,
     help = "whether or not to show visualizations after a run")
+ap.add_argument("-e", "--ensemble", type=int, default=0,
+    help = "in ensemble mode, run over a folder containing multiple datasets")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -62,113 +191,20 @@ if (args["multiClass"] == 1):
     trainY = convertToClasses(trainY)
     testY = convertToClasses(testY)
 
-# check to see if a grid search should be done
-if args["optimize"] == "gs":
-    # perform a grid search on the 'C' parameter of Logistic
-    # Regression
-    print "SEARCHING LOGISTIC REGRESSION"
-    params = {"C": [1.0, 10.0, 100.0]}
-    start = time.time()
-    gs = GridSearchCV(LogisticRegression(), params, n_jobs = -1, verbose = 1)
-    gs.fit(trainX, trainY)
- 
-    # print diagnostic information to the user and grab the
-    # best model
-    print "done in %0.3fs" % (time.time() - start)
-    print "best score: %0.3f" % (gs.best_score_)
-    print "LOGISTIC REGRESSION PARAMETERS"
-    bestParams = gs.best_estimator_.get_params()
- 
-    # loop over the parameters and print each of them out
-    # so they can be manually set
-    for p in sorted(params.keys()):
-        print "\t %s: %f" % (p, bestParams[p])
-        
-    # initialize the RBM + Logistic Regression pipeline
-    rbm = BernoulliRBM()
-    logistic = LogisticRegression()
-    classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
- 
-    # perform a grid search on the learning rate, number of
-    # iterations, and number of components on the RBM and
-    # C for Logistic Regression
-    print "SEARCHING RBM + LOGISTIC REGRESSION"
-    params = {
-        "rbm__learning_rate": [0.1, 0.01, 0.001],
-        "rbm__n_iter": [20, 40, 80],
-        "rbm__n_components": [50, 100, 200],
-        "logistic__C": [1.0, 10.0, 100.0]}
- 
-    # perform a grid search over the parameter
-    start = time.time()
-    gs = GridSearchCV(classifier, params, n_jobs = -1, verbose = 2)
-    gs.fit(trainX, trainY)
- 
-    # print diagnostic information to the user and grab the
-    # best model
-    print "\ndone in %0.3fs" % (time.time() - start)
-    print "best score: %0.3f" % (gs.best_score_)
-    print "RBM + LOGISTIC REGRESSION PARAMETERS"
-    bestParams = gs.best_estimator_.get_params()
- 
-    # loop over the parameters and print each of them out
-    # so they can be manually set
-    for p in sorted(params.keys()):
-        print "\t %s: %f" % (p, bestParams[p])
-    
-    clf = gs.best_estimator_    
-    clf.fit(trainX, trainY)
-    print("Accuracy Score on Validation Set: %s\n" % accuracy_score(testY, clf.predict(testX)))
- 
-    #make the 'model' folder if its not there
-    if(not os.path.exists(args["pickle"].split('/')[0])):
-        os.makedirs(args["pickle"].split('/')[0])
-        
-    # pickle this model so we can use it later
-    joblib.dump(clf, args["pickle"])
-    
-    # show a reminder message
-    print "\nIMPORTANT"
-    print "Now that your parameters have been searched, manually set"
-    print "them and re-run this script with --search 0"
-    
-# otherwise, use the manually specified parameters
-else:
-    # evaluate using Logistic Regression and only the raw
-    # features (these parameters were cross-validated)
-    logistic = LogisticRegression(C = 1.0)
-    logistic.fit(trainX, trainY)
-    print "LOGISTIC REGRESSION PERFORMANCE"
-    pred = logistic.predict(testX)
-    print classification_report(testY, pred)
-    print("Accuracy Score: %s\n" % accuracy_score(testY, pred)) 
- 
-    # initialize the RBM + Logistic Regression classifier with
-    # the cross-validated parameters
-    
-    if (os.path.isfile(args["pickle"]) and args["optimize"] == "load"):
-        print("Loading model: %s" % args["pickle"])
-        classifier = joblib.load(args["pickle"])
-    elif (os.path.isfile(args["pickle"]) and args["optimize"] == "refit"):
-        print("Loading model: %s" % args["pickle"])
-        classifier = joblib.load(args["pickle"])
-        classifier.fit(trainX, trainY)
-    else:
-        print("Creating new model with default parameters")
-        rbm = BernoulliRBM(n_components = 200, n_iter = 40,
-        learning_rate = 0.01)
-        logistic = LogisticRegression(C = 1.0)
-        classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
-        classifier.fit(trainX, trainY)
- 
-    # train the classifier and show an evaluation report
-    
-    #classifier.fit(trainX, trainY)
-    print "RBM + LOGISTIC REGRESSION PERFORMANCE"
-    pred = classifier.predict(testX)
-    print classification_report(testY, pred)
-    print("Accuracy Score: %s\n" % accuracy_score(testY, pred))
 
-    if (args["visualize"] == 1):
-        plot.accuracy(testY, pred, "RBM", c=testC)
-        plot.show()
+logitPred = doLogisticRegression(trainX, trainY, testX, testY, args["optimize"], args["pickle"])
+rbmPred = doRBM(trainX, trainY, testX, testY, args["optimize"], args["pickle"])
+
+print "LOGISTIC REGRESSION PERFORMANCE"
+print classification_report(testY, logitPred)
+print("Accuracy Score: %s\n" % accuracy_score(testY, logitPred))
+
+print "RBM PERFORMANCE"
+print classification_report(testY, rbmPred)
+print("Accuracy Score: %s\n" % accuracy_score(testY, rbmPred))
+
+
+if (args["visualize"] == 1):
+    plot.accuracy(testY, logitPred, "Logistic Regression", c=testC)
+    plot.accuracy(testY, rbmPred, "RBM", c=testC)
+    plot.show()
