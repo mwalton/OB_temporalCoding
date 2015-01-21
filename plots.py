@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-from Image import NEAREST
-from matplotlib.cm import cmap_d
+#from Image import NEAREST
+#from matplotlib.cm import cmap_d
 
 import numpy as np
 #import pylab as pl

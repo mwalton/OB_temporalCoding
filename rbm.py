@@ -10,8 +10,8 @@ import time
 from sklearn.metrics import accuracy_score
 from sklearn.externals import joblib
 import plots as plot
-from blz.tests.common import verbose
-from sklearn.preprocessing import StandardScaler
+#from blz.tests.common import verbose
+#from sklearn.preprocessing import StandardScaler
 #from pandas.rpy.common import load_data
 
 def loadData(XPath, yPath):
