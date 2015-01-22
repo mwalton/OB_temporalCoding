@@ -8,8 +8,13 @@ import numpy as np
 import argparse
 import time
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 from sklearn.externals import joblib
 import plots as plot
+import csv
 #from blz.tests.common import verbose
 #from sklearn.preprocessing import StandardScaler
 #from pandas.rpy.common import load_data
@@ -38,7 +43,7 @@ def doLogisticRegression(trainX, trainY, testX, testY, optimize, pklFolder):
         print "SEARCHING LOGISTIC REGRESSION HYPERPARAMS"
         params = {"C": [1.0, 10.0, 100.0]}
         start = time.time()
-        gs = GridSearchCV(LogisticRegression(), params, n_jobs = -1, verbose = 1)
+        gs = GridSearchCV(LogisticRegression(), params, n_jobs = 1, verbose = 1)
         gs.fit(trainX, trainY)
      
         # print diagnostic information to the user and grab the
@@ -106,7 +111,7 @@ def doRBM(trainX, trainY, testX, testY, optimize, pklFolder):
      
         # perform a grid search over the parameter
         start = time.time()
-        gs = GridSearchCV(classifier, params, n_jobs = -1, verbose = 2)
+        gs = GridSearchCV(classifier, params, n_jobs = 1, verbose = 2)
         gs.fit(trainX, trainY)
      
         # print diagnostic information to the user and grab the
@@ -176,6 +181,8 @@ ap.add_argument("-v", "--visualize", type=int, default=0,
     help = "whether or not to show visualizations after a run")
 ap.add_argument("-e", "--ensemble", type=int, default=0,
     help = "in ensemble mode, run over a folder containing multiple datasets")
+ap.add_argument("-s", "--save", default="",
+    help = "set this flag to write the results to a file")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -203,8 +210,28 @@ print "RBM PERFORMANCE"
 print classification_report(testY, rbmPred)
 print("Accuracy Score: %s\n" % accuracy_score(testY, rbmPred))
 
-
 if (args["visualize"] == 1):
     plot.accuracy(testY, logitPred, "Logistic Regression", c=testC)
     plot.accuracy(testY, rbmPred, "RBM", c=testC)
     plot.show()
+
+if (not args["save"] == ""):
+    predictions = [logitPred, rbmPred]   
+    
+    with open(args["save"], 'w') as csvfile:
+        fieldnames = ['x_parameter','accuracy_score',
+                      'precision_score', 'recall_score',
+                      'average_precision_score', 'f1_score']
+        
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    
+        for p in predictions:
+            results = {'x_parameter': p,
+                       'accuracy_score': accuracy_score(testY, p),
+                       'precision_score': precision_score(testY, p),
+                       'recall_score': recall_score(testY, p),
+                       'average_precision_score': average_precision_score(testY, p),
+                       'f1_score': f1_score(testY, p)}
+            
+            writer.writeheader()
+            writer.writerow({'x_parameter': 'someVal', 'last_name': 'Beans'})
