@@ -8,7 +8,6 @@ import numpy as np
 import argparse
 import time
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import average_precision_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
@@ -181,8 +180,12 @@ ap.add_argument("-v", "--visualize", type=int, default=0,
     help = "whether or not to show visualizations after a run")
 ap.add_argument("-e", "--ensemble", type=int, default=0,
     help = "in ensemble mode, run over a folder containing multiple datasets")
-ap.add_argument("-s", "--save", default="",
+ap.add_argument("-s", "--saveResults", default=None,
     help = "set this flag to write the results to a file")
+ap.add_argument("-l", "--label", default="",
+    help = "use this to label the data frame in the output csv")
+ap.add_argument("-V", "--verbose", type=int, default=0,
+    help = "prints results to stdout")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -215,23 +218,23 @@ if (args["visualize"] == 1):
     plot.accuracy(testY, rbmPred, "RBM", c=testC)
     plot.show()
 
-if (not args["save"] == ""):
-    predictions = [logitPred, rbmPred]   
+if (not args["saveResults"] == None):
+    predictions = [(args["label"], 'logistic', logitPred), (args["label"], 'rbm', rbmPred)]
     
-    with open(args["save"], 'w') as csvfile:
-        fieldnames = ['x_parameter','accuracy_score',
+    with open(args["saveResults"], 'w') as csvfile:
+        fieldnames = ['label', 'clf', 'accuracy_score',
                       'precision_score', 'recall_score',
-                      'average_precision_score', 'f1_score']
+                      'f1_score']
         
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    
-        for p in predictions:
-            results = {'x_parameter': p,
+        writer.writeheader()
+        
+        for l,c,p in predictions:
+            results = {'label': l,
+                       'clf': c,
                        'accuracy_score': accuracy_score(testY, p),
                        'precision_score': precision_score(testY, p),
                        'recall_score': recall_score(testY, p),
-                       'average_precision_score': average_precision_score(testY, p),
                        'f1_score': f1_score(testY, p)}
             
-            writer.writeheader()
-            writer.writerow({'x_parameter': 'someVal', 'last_name': 'Beans'})
+            writer.writerow(results)
