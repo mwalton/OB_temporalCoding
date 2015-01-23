@@ -1,2 +1,5 @@
 /model/
 /out.csv
+/results/
+/same.csv
+/diff.csv
