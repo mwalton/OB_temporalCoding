@@ -14,9 +14,20 @@ from sklearn.metrics import f1_score
 from sklearn.externals import joblib
 import plots as plot
 import csv
+from os import listdir
+
 #from blz.tests.common import verbose
 #from sklearn.preprocessing import StandardScaler
 #from pandas.rpy.common import load_data
+
+def getIndependentVarIndicies(files, delimiter):
+    n = []
+    for f in files:
+        n.append(f.split(delimiter)[0])
+        
+    i = np.array(n)
+    i = np.unique(i)
+    return i
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -94,7 +105,7 @@ def doRBM(trainX, trainY, testX, testY, optimize, pklFolder):
     if (optimize=="gs"):
         # initialize the RBM + Logistic Regression pipeline
         rbm = BernoulliRBM(n_components = 200, n_iter = 40,
-        learning_rate = 0.01)
+        learning_rate = 0.01, random_state=0)
         logistic = LogisticRegression(C = 1.0)
         classifier = Pipeline([("rbm", rbm), ("logistic", logistic)])
      
@@ -146,7 +157,7 @@ def doRBM(trainX, trainY, testX, testY, optimize, pklFolder):
     else:
         print("Creating new RBM with default parameters")
         rbm = BernoulliRBM(n_components = 200, n_iter = 40,
-        learning_rate = 0.01)
+        learning_rate = 0.01, random_state=0)
         logistic = LogisticRegression(C = 1.0)
         clf = Pipeline([("rbm", rbm), ("logistic", logistic)])
         clf.fit(trainX, trainY)
@@ -159,7 +170,58 @@ def doRBM(trainX, trainY, testX, testY, optimize, pklFolder):
         joblib.dump(clf, picklePath)
         
     return clf.predict(testX)
+
+def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
+    (trainX, trainY) = loadData(xTrain, yTrain)
+    (testX, testY) = loadData(xTest, yTest)
+    
+    # required scaling for rbm
+    trainX = scale(trainX)
+    testX = scale(testX)
+    
+    testC = testY
+    
+    if (arguments["multiClass"] == 1):
+        trainY = convertToClasses(trainY)
+        testY = convertToClasses(testY)
+    
+    logitPred = doLogisticRegression(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
+    rbmPred = doRBM(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
+    
+    if (arguments["verbose"] == 1):
+        print "LOGISTIC REGRESSION PERFORMANCE"
+        print classification_report(testY, logitPred)
+        print("Accuracy Score: %s\n" % accuracy_score(testY, logitPred))
         
+        print "RBM PERFORMANCE"
+        print classification_report(testY, rbmPred)
+        print("Accuracy Score: %s\n" % accuracy_score(testY, rbmPred))
+    
+    if (arguments["visualize"] == 1):
+        plot.accuracy(testY, logitPred, "Logistic Regression", c=testC)
+        plot.accuracy(testY, rbmPred, "RBM", c=testC)
+        plot.show()
+
+    if (label == "meanBg"):
+        labelVal = np.mean(testC[:,0])
+    else:
+        labelVal = "NA"
+    
+    predictions = [(labelVal, 'logistic', logitPred), (labelVal, 'rbm', rbmPred)]
+ 
+    rets = []
+    
+    for l,c,p in predictions:
+        ret = {'label': l,
+                   'clf': c,
+                   'accuracy_score': accuracy_score(testY, p),
+                   'precision_score': precision_score(testY, p),
+                   'recall_score': recall_score(testY, p),
+                   'f1_score': f1_score(testY, p)}
+        rets.append(ret)
+        
+    return rets
+                         
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-x", "--xTrain", required = True,
@@ -182,45 +244,32 @@ ap.add_argument("-e", "--ensemble", type=int, default=0,
     help = "in ensemble mode, run over a folder containing multiple datasets")
 ap.add_argument("-s", "--saveResults", default=None,
     help = "set this flag to write the results to a file")
-ap.add_argument("-l", "--label", default="",
-    help = "use this to label the data frame in the output csv")
+ap.add_argument("-r", "--recursive", default="",
+    help = "use this flag to iterate over all sub dirs in the indicated directory")
 ap.add_argument("-V", "--verbose", type=int, default=0,
     help = "prints results to stdout")
+ap.add_argument("-l", "--label", default="NA",
+    help = "choose a lable for the independent variable, useful if running recursive mode")
 args = vars(ap.parse_args())
 
-(trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
-(testX, testY) = loadData(args["xTest"], args["yTest"])
+results = []
 
-# required scaling for rbm
-trainX = scale(trainX)
-testX = scale(testX)
-
-testC = testY
-
-if (args["multiClass"] == 1):
-    trainY = convertToClasses(trainY)
-    testY = convertToClasses(testY)
-
-
-logitPred = doLogisticRegression(trainX, trainY, testX, testY, args["optimize"], args["pickle"])
-rbmPred = doRBM(trainX, trainY, testX, testY, args["optimize"], args["pickle"])
-
-print "LOGISTIC REGRESSION PERFORMANCE"
-print classification_report(testY, logitPred)
-print("Accuracy Score: %s\n" % accuracy_score(testY, logitPred))
-
-print "RBM PERFORMANCE"
-print classification_report(testY, rbmPred)
-print("Accuracy Score: %s\n" % accuracy_score(testY, rbmPred))
-
-if (args["visualize"] == 1):
-    plot.accuracy(testY, logitPred, "Logistic Regression", c=testC)
-    plot.accuracy(testY, rbmPred, "RBM", c=testC)
-    plot.show()
+if (not args["recursive"] == ""):
+    files = listdir(args["recursive"])
+    indVar = getIndependentVarIndicies(files, 't')
+    
+    for i in indVar:
+        xTrain = os.path.join(args["recursive"], i + args["xTrain"])
+        yTrain = os.path.join(args["recursive"], i + args["yTrain"])
+        xTest = os.path.join(args["recursive"], i + args["xTest"])
+        yTest = os.path.join(args["recursive"], i + args["yTest"])
+        
+        result = runTest(xTrain, yTrain, xTest, yTest, arguments=args, label=args["label"])
+        results.extend(result)
+else:
+    results = runTest(args["xTrain"], args["yTrain"], args["xTest"], args["yTest"], arguments=args, label=args["label"])
 
 if (not args["saveResults"] == None):
-    predictions = [(args["label"], 'logistic', logitPred), (args["label"], 'rbm', rbmPred)]
-    
     with open(args["saveResults"], 'w') as csvfile:
         fieldnames = ['label', 'clf', 'accuracy_score',
                       'precision_score', 'recall_score',
@@ -228,13 +277,5 @@ if (not args["saveResults"] == None):
         
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        
-        for l,c,p in predictions:
-            results = {'label': l,
-                       'clf': c,
-                       'accuracy_score': accuracy_score(testY, p),
-                       'precision_score': precision_score(testY, p),
-                       'recall_score': recall_score(testY, p),
-                       'f1_score': f1_score(testY, p)}
-            
-            writer.writerow(results)
+        for r in results:
+            writer.writerow(r)
