@@ -15,6 +15,7 @@ from sklearn.externals import joblib
 import plots as plot
 import csv
 from os import listdir
+from sklearn.metrics.metrics import accuracy_score
 
 #from blz.tests.common import verbose
 #from sklearn.preprocessing import StandardScaler
@@ -188,6 +189,16 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
     logitPred = doLogisticRegression(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
     rbmPred = doRBM(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
     
+    with open('train_result.csv', 'w') as csvfile:
+        header = ['train_BGc', 'rbm_accuracy', 'logit_accuracy']
+    
+        writer = csv.DictWriter(csvfile, fieldnames=header)
+        writer.writeheader()
+        writer.writerow({'train_BGc' : np.mean(testC[:,0]),
+                         'rbm_accuracy' : accuracy_score(testY, rbmPred),
+                         'logit_accuracy' : accuracy_score(testY, logitPred)
+                         })
+        
     if (arguments["verbose"] == 1):
         print "LOGISTIC REGRESSION PERFORMANCE"
         print classification_report(testY, logitPred)

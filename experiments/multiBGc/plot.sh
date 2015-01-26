@@ -6,4 +6,4 @@ python $prjPath/rbm.py --xTrain "$xTrain" --yTrain "$yTrain" --xTest "$xTest" --
 
 python $prjPath/rbm.py --xTrain "$xTrain" --yTrain "$yTrain" --xTest "$xTest" --yTest "$yTest" --optimize load --visualize 0 --saveResults diff.csv --verbose 1 --recursive "$diffDataPath" --label meanBg --pickle "diffMdl"
 
-python plotResults.py -s same.csv -d diff.csv
+python plotResults.py -s same.csv -d diff.csv -t train_result.csv

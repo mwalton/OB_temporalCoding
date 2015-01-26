@@ -29,12 +29,17 @@ ap.add_argument("-s", "--same", required = True,
     help = "path to same train / test BG results")
 ap.add_argument("-d", "--diff", required = True,
     help = "path to diff train / test BG results")
-ap.add_argument("-t", "--trainPoint", required = True,
-    help = "maxC in the dataset where the classifier was trained")
+ap.add_argument("-t", "--trainResult", required = True,
+    help = "training results output")
 args = vars(ap.parse_args())
   
 (sH, sX, sY) = loadData(args["same"])
 (dH, dX, dY) = loadData(args["diff"])
+
+trainResult = np.genfromtxt(args["trainResult"], delimiter=",", dtype=float, skip_header=1)
+mean_BGc = trainResult[0]
+
+print mean_BGc
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
@@ -43,6 +48,7 @@ samePlt = ax1.plot(sX, sY[:,0], '-o', c='b', label='same BG')
 diffPlt = ax1.plot(dX, dY[:,0], '-o', c='r', label='diff BG')
 ax1.set_title(sH[2])
 ax1.legend(handles=[samePlt, diffPlt], labels=['same BG', 'diff BG'])
+ax1.axvline(mean_BGc, color='y')
 #ax1.scatter(dX, dY[:,0],c='r', marker='o', label='diff BG')
 
 plt.show()
