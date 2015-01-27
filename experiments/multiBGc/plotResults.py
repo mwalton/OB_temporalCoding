@@ -31,6 +31,8 @@ ap.add_argument("-d", "--diff", required = True,
     help = "path to diff train / test BG results")
 ap.add_argument("-t", "--trainResult", required = True,
     help = "training results output")
+ap.add_argument("-f", "--fileOut", default="",
+    help = "if defined, plot will be written to file instead of displayed")
 args = vars(ap.parse_args())
   
 (sH, sX, sY) = loadData(args["same"])
@@ -38,8 +40,6 @@ args = vars(ap.parse_args())
 
 trainResult = np.genfromtxt(args["trainResult"], delimiter=",", dtype=float, skip_header=1)
 mean_BGc = trainResult[0]
-
-print mean_BGc
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
@@ -49,8 +49,14 @@ diffPlt = ax1.plot(dX, dY[:,0], '-o', c='r', label='diff BG')
 ax1.set_title(sH[2])
 ax1.legend(handles=[samePlt, diffPlt], labels=['same BG', 'diff BG'])
 ax1.axvline(mean_BGc, color='y')
+ax1.set_xlabel('Mean Background Concentration')
+ax1.set_ylabel('Accuracy')
+ax1.set_ylim([0.85, 1.0])
 #ax1.scatter(dX, dY[:,0],c='r', marker='o', label='diff BG')
 
-plt.show()
+if (not args["fileOut"] == ""):
+    plt.savefig(args["fileOut"])
+else:
+    plt.show()
 
 #print(same)

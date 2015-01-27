@@ -1,6 +1,6 @@
 #!/bin/sh
 
-trainTarget=0.05
+trainTarget=0.11
 
 sameDataPath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/sameBg"
 diffDataPath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/diffBg"

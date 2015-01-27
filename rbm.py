@@ -22,6 +22,8 @@ from sklearn.metrics.metrics import accuracy_score
 #from pandas.rpy.common import load_data
 
 def getIndependentVarIndicies(files, delimiter):
+    #here we just want to be able to get all the file prefixes and return a sorted
+    #array containing exactly one occurance of each prefix
     n = []
     for f in files:
         n.append(f.split(delimiter)[0])
@@ -44,6 +46,7 @@ def scale(X, eps = 0.00001):
     return (X - np.min(X, axis = 0)) / (np.max(X, axis = 0) + eps)
 
 def convertToClasses(targetVector):
+    #class labels are simply the analyte at max concentration
     return np.argmax(targetVector[:,1:5], axis=1)
 
 def doLogisticRegression(trainX, trainY, testX, testY, optimize, pklFolder):
@@ -79,14 +82,17 @@ def doLogisticRegression(trainX, trainY, testX, testY, optimize, pklFolder):
         joblib.dump(logistic, picklePath)
         
     elif (os.path.isfile(picklePath) and args["optimize"] == "load"):
+        # simply load the pre-fit model and use it
         print("Loading model: %s" % picklePath)
         logistic = joblib.load(picklePath)
     elif (os.path.isfile(picklePath) and args["optimize"] == "refit"):
+        # load and fit to current dataset
         print("Loading model: %s and refitting" % picklePath)
         logistic = joblib.load(picklePath)
         logistic.fit(trainX, trainY)
     
     else:
+        # create a new model using default parameters
         print("Creating new Logit model with default parameters")
         logistic = LogisticRegression(C = 1.0)
         logistic.fit(trainX, trainY)
@@ -180,6 +186,7 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
     trainX = scale(trainX)
     testX = scale(testX)
     
+    # save the test concentration series, testY becomes class labels
     testC = testY
     
     if (arguments["multiClass"] == 1):
@@ -189,15 +196,18 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
     logitPred = doLogisticRegression(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
     rbmPred = doRBM(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
     
-    with open('train_result.csv', 'w') as csvfile:
-        header = ['train_BGc', 'rbm_accuracy', 'logit_accuracy']
-    
-        writer = csv.DictWriter(csvfile, fieldnames=header)
-        writer.writeheader()
-        writer.writerow({'train_BGc' : np.mean(testC[:,0]),
-                         'rbm_accuracy' : accuracy_score(testY, rbmPred),
-                         'logit_accuracy' : accuracy_score(testY, logitPred)
-                         })
+    # write the results of the training / optimization phase
+    if (arguments["optimize"] == "new" or arguments["optimize"] == "gs"):
+        with open(arguments["label"] + 'train_result.csv', 'w') as csvfile:
+            header = ['train_BGc', 'model_fit', 'rbm_accuracy', 'logit_accuracy']
+        
+            writer = csv.DictWriter(csvfile, fieldnames=header)
+            writer.writeheader()
+            writer.writerow({'train_BGc' : np.mean(testC[:,0]),
+                             'model_fit' : arguments["optimize"],
+                             'rbm_accuracy' : accuracy_score(testY, rbmPred),
+                             'logit_accuracy' : accuracy_score(testY, logitPred)
+                             })
         
     if (arguments["verbose"] == 1):
         print "LOGISTIC REGRESSION PERFORMANCE"
@@ -213,12 +223,9 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
         plot.accuracy(testY, rbmPred, "RBM", c=testC)
         plot.show()
 
-    if (label == "meanBg"):
-        labelVal = np.mean(testC[:,0])
-    else:
-        labelVal = "NA"
+    mbgc = np.mean(testC[:,0])
     
-    predictions = [(labelVal, 'logistic', logitPred), (labelVal, 'rbm', rbmPred)]
+    predictions = [(mbgc, 'logistic', logitPred), (mbgc, 'rbm', rbmPred)]
  
     rets = []
     
@@ -260,7 +267,7 @@ ap.add_argument("-r", "--recursive", default="",
 ap.add_argument("-V", "--verbose", type=int, default=0,
     help = "prints results to stdout")
 ap.add_argument("-l", "--label", default="NA",
-    help = "choose a lable for the independent variable, useful if running recursive mode")
+    help = "choose a label for the independent variable, useful if running recursive mode")
 args = vars(ap.parse_args())
 
 results = []
@@ -281,7 +288,7 @@ else:
     results = runTest(args["xTrain"], args["yTrain"], args["xTest"], args["yTest"], arguments=args, label=args["label"])
 
 if (not args["saveResults"] == None):
-    with open(args["saveResults"], 'w') as csvfile:
+    with open(args["label"] + args["saveResults"], 'w') as csvfile:
         fieldnames = ['label', 'clf', 'accuracy_score',
                       'precision_score', 'recall_score',
                       'f1_score']
