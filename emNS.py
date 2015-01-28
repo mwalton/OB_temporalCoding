@@ -12,13 +12,24 @@ ap.add_argument("-v", "--visualize", type=int, default=0,
     help = "whether or not to show visualizations after a run")
 ap.add_argument("-c", "--concentration", default="none",
     help = "add concentration series data to the plot")
+ap.add_argument("-s", "--start", type=int, default=0,
+    help = "the timpoint in the series to begin measurement")
+ap.add_argument("-e", "--end", type=int, default=-1,
+    help = "the timpoint in the series to end measurement")
 args = vars(ap.parse_args())
 
 data = np.genfromtxt(args["input"], delimiter=",", dtype="float32", skip_header=1)
 
-target = data[:,0]
-ctx_pred = data[:,1]
-f_pred = data[:,2]
+if (args["end"] == -1):
+    end = np.shape(data)[0] - 1
+else:
+    end = args["end"]
+    
+start = args["start"]
+
+ctx_pred = data[start:end,1]
+f_pred = data[start:end,0]
+target = data[start:end,2]
 
 ctx_accuracy = (target == ctx_pred)
 f_accuracy = (target == f_pred)
