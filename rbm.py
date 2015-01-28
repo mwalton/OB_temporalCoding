@@ -15,7 +15,7 @@ from sklearn.externals import joblib
 import plots as plot
 import csv
 from os import listdir
-from sklearn.metrics.metrics import accuracy_score
+#from sklearn.metrics.metrics import accuracy_score
 
 #from blz.tests.common import verbose
 #from sklearn.preprocessing import StandardScaler
