@@ -27,6 +27,8 @@ else:
     
 start = args["start"]
 
+#data = np.absolute(data)
+
 ctx_pred = data[start:end,1]
 f_pred = data[start:end,0]
 target = data[start:end,2]
