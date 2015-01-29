@@ -6,3 +6,5 @@
 /sameMdl/
 /diffMdl/
 /train_result.csv
+/meanBgdiff.csv
+/meanBgsame.csv
