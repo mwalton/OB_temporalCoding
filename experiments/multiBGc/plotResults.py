@@ -99,9 +99,9 @@ diffCtx_plt = ax1.plot(dX, ctx_dY, '-o', c='purple', label='Ctx diff BG')
 
 ax1.set_title(sH[2])
 box = ax1.get_position()
-ax1.set_position([box.x0, box.y0 + box.height * 0.1,
+ax1.set_position([box.x0, box.y0 + box.height * 0.15,
                  box.width, box.height * 0.9])
-ax1.legend(loc='upper center', ncol=3, bbox_to_anchor=(0.5, -0.05),
+ax1.legend(loc='upper center', ncol=3, bbox_to_anchor=(0.5, -0.1),
            handles=[samePlt, diffPlt, sameNS_plt, diffNS_plt, sameCtx_plt, diffCtx_plt],
            labels=['RBM same BG', 'RBM diff BG', 'NS same BG', 'NS diff BG', 'Ctx same BG', 'Ctx diff BG'])
 ax1.axvline(mean_BGc, color='y')
