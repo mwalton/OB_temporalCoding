@@ -8,4 +8,4 @@ prjPath=/Users/michaelwalton/workspace/git/artificial-olfaction
 
 concPath="$dataPath/${cFile}"
 
-nsPath=$resultsPath/sameBg/0.19/tstepAccuracy.csv
+nsPath=$resultsPath/predSame.csv

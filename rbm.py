@@ -223,6 +223,10 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
         plot.accuracy(testY, rbmPred, "RBM", c=testC)
         plot.show()
 
+    if (arguments["predOut"] == 1):
+        np.savetxt("logitPred.csv", logitPred, delimiter=",")
+        np.savetxt("rbmPred.csv", rbmPred, delimiter=",")
+        
     mbgc = np.mean(testC[:,0])
     
     predictions = [(mbgc, 'logistic', logitPred), (mbgc, 'rbm', rbmPred)]
@@ -268,6 +272,8 @@ ap.add_argument("-V", "--verbose", type=int, default=0,
     help = "prints results to stdout")
 ap.add_argument("-l", "--label", default="NA",
     help = "choose a label for the independent variable, useful if running recursive mode")
+ap.add_argument("-P", "--predOut", type=int, default=0,
+    help = "output the predicition vectors to file")
 args = vars(ap.parse_args())
 
 results = []
