@@ -42,8 +42,8 @@ for f in frames:
     #print t
     cv2.circle(overlay, (200, 25), 20, colors[targetIdx], -1)
     cv2.circle(overlay, (200, 75), 20, colors[predIdx], -1)
-    cv2.putText(overlay, "Target", (250, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 2)
-    cv2.putText(overlay, "Prediction", (250, 80), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 2)
+    cv2.putText(overlay, "Target", (250, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
+    cv2.putText(overlay, "Prediction", (250, 80), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
     # blend with the original:
     opacity = 0.4
     cv2.addWeighted(overlay, opacity, img, 1 - opacity, 0, img)
