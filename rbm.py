@@ -192,6 +192,9 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
     if (arguments["multiClass"] == 1):
         trainY = convertToClasses(trainY)
         testY = convertToClasses(testY)
+    else:
+        trainY = np.transpose(trainY)
+        testY = np.transpose(testY)
     
     logitPred = doLogisticRegression(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
     rbmPred = doRBM(trainX, trainY, testX, testY, arguments["optimize"], arguments["pickle"])
