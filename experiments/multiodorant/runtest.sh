@@ -2,4 +2,4 @@
 
 source header.sh
 
-python $prjPath/multiSVR.py --xTrain "$xTrain" --yTrain "$yTrain" --xTest "$xTest" --yTest "$yTest"
+python $prjPath/multiLblReg.py --xTrain "$xTrain" --yTrain "$yTrain" --xTest "$xTest" --yTest "$yTest"

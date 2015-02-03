@@ -78,6 +78,7 @@ for (i,clf) in enumerate(clfEnsemble):
 # declare a container to hold the vector accuracy timeseries
 vecA = []
 
+# for each timestep, if at least minEvalC is present, compute vector_accuracy
 for i in range(np.shape(testY)[0]):
     if (np.argmax(testY[i,:]) > args["minEvalConcentration"]):
         vecA.append(vector_accuracy(pred[i,:], testY[i,:]))
