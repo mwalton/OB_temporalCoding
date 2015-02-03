@@ -51,6 +51,10 @@ ap.add_argument("-Y", "--yTest", required = True,
     help = "path to testing target set")
 ap.add_argument("-m", "--minEvalConcentration", default=0.0,
     help = "the minimum concentration to evaluate performance")
+ap.add_argument("-p", "--predOut", type=int, default=0,
+    help = "if true, write the prediction to file")
+ap.add_argument("-v", "--visualize", type=int, default=0,
+    help = "if true, show the timeseries plot")
 args = vars(ap.parse_args())
 
 (trainX, trainY) = loadData(args["xTrain"], args["yTrain"])
@@ -85,21 +89,25 @@ for i in range(np.shape(testY)[0]):
 
 print("Multi-odorant Accuracy: %s\n" % np.mean(vecA, dtype=float))
 
-fig = plt.figure()
-ax1 = fig.add_subplot(211)
-ax1.plot(testY)
-ax1.set_title('True Target Signals')
-ax1.set_xlabel('t')
-ax1.set_ylabel('log[C]')
-#ax1.set_yscale('log')
-#ax1.set_ylim(0.01,0.7)
-
-ax2 = fig.add_subplot(212)
-ax2.plot(pred)
-ax2.set_title('Predicted Target Signals')
-ax2.set_xlabel('t')
-ax2.set_ylabel('log[C]')
-#ax2.set_yscale('log')
-#ax2.set_ylim(0.01,0.7)
-
-plt.show()
+if (args["visualize"] == 1):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax1.plot(testY)
+    ax1.set_title('True Target Signals')
+    ax1.set_xlabel('t')
+    ax1.set_ylabel('log[C]')
+    #ax1.set_yscale('log')
+    #ax1.set_ylim(0.01,0.7)
+    
+    ax2 = fig.add_subplot(212)
+    ax2.plot(pred)
+    ax2.set_title('Predicted Target Signals')
+    ax2.set_xlabel('t')
+    ax2.set_ylabel('log[C]')
+    #ax2.set_yscale('log')
+    #ax2.set_ylim(0.01,0.7)
+    
+    plt.show()
+    
+if (args["predOut"] == 1):
+    np.savetxt("multiPred.csv", pred, delimiter=",")

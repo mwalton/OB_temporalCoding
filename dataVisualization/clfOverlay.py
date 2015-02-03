@@ -14,6 +14,10 @@ ap.add_argument("-c", "--concentration", required = True,
     help = "concentration label file")
 ap.add_argument("-p", "--prediction", required=True,
     help = "the prediction to be used in this assessment")
+ap.add_argument("-r", "--regression", required=True,
+    help = "the regression to be used in the visualization")
+ap.add_argument("-a", "--ampColor", type=int, default=1,
+    help = "scale the color intensity with this value")
 args = vars(ap.parse_args())
 
 yTarget = np.genfromtxt(args["concentration"], delimiter=",", dtype="float32")
@@ -21,6 +25,8 @@ yTarget = np.argmax(yTarget[:,1:5], axis=1)
 
 yPred = np.genfromtxt(args["prediction"], delimiter=",", dtype="float32")
 yPred = yPred.real.astype(int)
+
+yReg = np.genfromtxt(args["regression"], delimiter=",",dtype="float32")
 
 colors = [(0,0,255), (0,255,0), (255,0,0), (0,255,255)]
 
@@ -36,14 +42,25 @@ for f in frames:
     if (frameIdx >= np.shape(yTarget)[0]):
         break
     
-    
     targetIdx = yTarget[frameIdx]
     predIdx = yPred[frameIdx]
-    #print t
-    cv2.circle(overlay, (200, 25), 20, colors[targetIdx], -1)
-    cv2.circle(overlay, (200, 75), 20, colors[predIdx], -1)
-    cv2.putText(overlay, "Target", (250, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
-    cv2.putText(overlay, "Prediction", (250, 80), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
+    cVec = yReg[frameIdx]
+    cVec[cVec<0.00000001] = 0.00000001
+    cVec = np.tanh(cVec * 1000)
+    #print cVec
+    
+    # do the target / classification prediction overlay
+    cv2.circle(overlay, (25, 25), 20, colors[targetIdx], -1)
+    cv2.circle(overlay, (25, 75), 20, colors[predIdx], -1)
+    cv2.putText(overlay, "Target", (75, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
+    cv2.putText(overlay, "Prediction", (75, 80), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
+    
+    # do the regression overlay
+    cv2.circle(overlay, (300, 50), 20, colors[0] * cVec[0], -1)
+    cv2.circle(overlay, (350, 50), 20, colors[1] * cVec[1], -1)
+    cv2.circle(overlay, (400, 50), 20, colors[2] * cVec[2], -1)
+    cv2.circle(overlay, (450, 50), 20, colors[3] * cVec[3], -1)
+    
     # blend with the original:
     opacity = 0.4
     cv2.addWeighted(overlay, opacity, img, 1 - opacity, 0, img)
