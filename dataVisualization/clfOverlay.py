@@ -45,21 +45,42 @@ for f in frames:
     targetIdx = yTarget[frameIdx]
     predIdx = yPred[frameIdx]
     cVec = yReg[frameIdx]
-    cVec[cVec<0.00000001] = 0.00000001
-    cVec = np.tanh(cVec * 1000)
+    #cVec += 100
+    cVec[cVec<1e-10] = 1e-10
+    #cVec = np.log10(cVec)
+    #cVec[cVec>0.0001] = 0.0001
+    #cVec *= 10000
+    cVec[cVec>0.1] = 0.1
+    cVec[cVec<1e-6] = 1e-6
+    
+    #cVec = np.tanh(cVec)
+    cVec *= 25500.0
+    cVec[cVec<1] = 1
+    cVec[cVec>255] = 255
     #print cVec
     
+    #cVec *= 255.0 / cVec.max(axis=0)
+    
     # do the target / classification prediction overlay
-    cv2.circle(overlay, (25, 25), 20, colors[targetIdx], -1)
-    cv2.circle(overlay, (25, 75), 20, colors[predIdx], -1)
-    cv2.putText(overlay, "Target", (75, 25), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
-    cv2.putText(overlay, "Prediction", (75, 80), cv2.FONT_HERSHEY_PLAIN, 1.5, (255,255,255), 1)
+    cv2.circle(overlay, (25, 35), 20, colors[targetIdx], -1,cv2.CV_AA)
+    cv2.circle(overlay, (25, 90), 20, colors[predIdx], -1,cv2.CV_AA)
+    cv2.putText(overlay, "Target", (75, 45), cv2.FONT_ITALIC, 1, (255,255,255), 1,cv2.CV_AA)
+    cv2.putText(overlay, "Prediction", (75, 100), cv2.FONT_ITALIC, 1, (255,255,255), 1,cv2.CV_AA)
+    cv2.putText(overlay, "Readout Vector", (350, 100), cv2.FONT_ITALIC, 1, (255,255,255), 1,cv2.CV_AA)
+    
+    print cVec
+    
+    #Do the regression outlines
+    cv2.ellipse(overlay, (400,50), (21,21), 0, 0, 360, (175,175,175), 1,cv2.CV_AA)
+    cv2.ellipse(overlay, (450,50), (21,21), 0, 0, 360, (175,175,175), 1,cv2.CV_AA)
+    cv2.ellipse(overlay, (500,50), (21,21), 0, 0, 360, (175,175,175), 1,cv2.CV_AA)
+    cv2.ellipse(overlay, (550,50), (21,21), 0, 0, 360, (175,175,175), 1,cv2.CV_AA)
     
     # do the regression overlay
-    cv2.circle(overlay, (300, 50), 20, colors[0] * cVec[0], -1)
-    cv2.circle(overlay, (350, 50), 20, colors[1] * cVec[1], -1)
-    cv2.circle(overlay, (400, 50), 20, colors[2] * cVec[2], -1)
-    cv2.circle(overlay, (450, 50), 20, colors[3] * cVec[3], -1)
+    cv2.circle(overlay, (400, 50), 20, (0,0,int(cVec[0])), -1,cv2.CV_AA)
+    cv2.circle(overlay, (450, 50), 20, (0,int(cVec[1]),0), -1,cv2.CV_AA)
+    cv2.circle(overlay, (500, 50), 20, (int(cVec[2]),0,0), -1,cv2.CV_AA)
+    cv2.circle(overlay, (550, 50), 20, (0,int(cVec[3]),int(cVec[3])), -1,cv2.CV_AA)
     
     # blend with the original:
     opacity = 0.4
@@ -68,7 +89,7 @@ for f in frames:
     outpath = path.join(args["outputFolder"], f)
     cv2.imwrite(outpath, overlay)
     
-    sys.stdout.write('.')
+    #sys.stdout.write('.')
     sys.stdout.flush()
     
 print
