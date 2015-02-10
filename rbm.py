@@ -178,7 +178,7 @@ def doRBM(trainX, trainY, testX, testY, optimize, pklFolder):
         
     return clf.predict(testX)
 
-def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
+def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA", index=None):
     (trainX, trainY) = loadData(xTrain, yTrain)
     (testX, testY) = loadData(xTest, yTest)
     
@@ -201,16 +201,26 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
     
     # write the results of the training / optimization phase
     if (arguments["optimize"] == "new" or arguments["optimize"] == "gs"):
-        with open(arguments["label"] + 'train_result.csv', 'w') as csvfile:
-            header = ['train_BGc', 'model_fit', 'rbm_accuracy', 'logit_accuracy']
+        if (not os.path.isfile(arguments["label"] + 'train_result.csv')):
+            mode = 'w'
+            writeH = True
+        else:
+            mode = 'a'
+            writeH = False
+        
+        with open(arguments["label"] + 'train_result.csv', mode) as csvfile:
+            header = ['index', 'model_fit', 'rbm_accuracy', 'logit_accuracy']
+            
+            label = index if not (index==None) else np.mean(testC[:,0])
         
             writer = csv.DictWriter(csvfile, fieldnames=header)
-            writer.writeheader()
-            writer.writerow({'train_BGc' : np.mean(testC[:,0]),
+            if (writeH): writer.writeheader()
+            writer.writerow({'index' : label,
                              'model_fit' : arguments["optimize"],
                              'rbm_accuracy' : accuracy_score(testY, rbmPred),
                              'logit_accuracy' : accuracy_score(testY, logitPred)
                              })
+            print [label, accuracy_score(testY, rbmPred), accuracy_score(testY, logitPred)]
         
     if (arguments["verbose"] == 1):
         print "LOGISTIC REGRESSION PERFORMANCE"
@@ -230,9 +240,12 @@ def runTest(xTrain, yTrain, xTest, yTest, arguments, label="NA"):
         np.savetxt("logitPred.csv", logitPred, delimiter=",")
         np.savetxt("rbmPred.csv", rbmPred, delimiter=",")
         
-    mbgc = np.mean(testC[:,0])
+    if (index==None):
+        label = np.mean(testC[:,0])
+    else:
+        label = index
     
-    predictions = [(mbgc, 'logistic', logitPred), (mbgc, 'rbm', rbmPred)]
+    predictions = [(index, 'logistic', logitPred), (index, 'rbm', rbmPred)]
  
     rets = []
     
@@ -286,12 +299,13 @@ if (not args["recursive"] == ""):
     indVar = getIndependentVarIndicies(files, 't')
     
     for i in indVar:
+        print("Generating model for dataset " + i)
         xTrain = os.path.join(args["recursive"], i + args["xTrain"])
         yTrain = os.path.join(args["recursive"], i + args["yTrain"])
         xTest = os.path.join(args["recursive"], i + args["xTest"])
         yTest = os.path.join(args["recursive"], i + args["yTest"])
         
-        result = runTest(xTrain, yTrain, xTest, yTest, arguments=args, label=args["label"])
+        result = runTest(xTrain, yTrain, xTest, yTest, arguments=args, label=args["label"], index=i)
         results.extend(result)
 else:
     results = runTest(args["xTrain"], args["yTrain"], args["xTest"], args["yTest"], arguments=args, label=args["label"])
