@@ -1,0 +1,10 @@
+/model/
+/out.csv
+/results/
+/same.csv
+/diff.csv
+/sameMdl/
+/diffMdl/
+/train_result.csv
+/meanBgdiff.csv
+/meanBgsame.csv
