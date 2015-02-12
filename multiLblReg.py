@@ -4,6 +4,7 @@ from sklearn.preprocessing import StandardScaler
 import argparse
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 #from sklearn.linear_model import SGDRegressor
 
 def loadData(XPath, yPath):
@@ -87,7 +88,8 @@ for i in range(np.shape(testY)[0]):
     if (np.argmax(testY[i,:]) > args["minEvalConcentration"]):
         vecA.append(vector_accuracy(pred[i,:], testY[i,:]))
 
-print("Multi-odorant Accuracy: %s\n" % np.mean(vecA, dtype=float))
+print("Normalized product: %s\n" % np.mean(vecA, dtype=float))
+print("RMSE: %s\n" % mean_squared_error(testY, pred))
 
 if (args["visualize"] == 1):
     fig = plt.figure()
@@ -96,16 +98,16 @@ if (args["visualize"] == 1):
     ax1.set_title('True Target Signals')
     ax1.set_xlabel('t')
     ax1.set_ylabel('log[C]')
-    #ax1.set_yscale('log')
-    #ax1.set_ylim(0.01,0.7)
+    ax1.set_yscale('log')
+    ax1.set_ylim(10e-3,1)
     
     ax2 = fig.add_subplot(212)
     ax2.plot(pred)
     ax2.set_title('Predicted Target Signals')
     ax2.set_xlabel('t')
     ax2.set_ylabel('log[C]')
-    #ax2.set_yscale('log')
-    #ax2.set_ylim(0.01,0.7)
+    ax2.set_yscale('log')
+    ax2.set_ylim(10e-3,1)
     
     plt.show()
     
