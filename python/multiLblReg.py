@@ -5,6 +5,7 @@ import argparse
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+from sympy.mpmath.tests.test_quad import xtest_double_7
 #from sklearn.linear_model import SGDRegressor
 
 def loadData(XPath, yPath):
@@ -65,13 +66,16 @@ args = vars(ap.parse_args())
 trainX = standardize(trainX)
 testX = standardize(testX)
 
+print ("shape before strip BG %s" % str(np.shape(trainY)))
 # remove the background label
-trainY = trainY[:,1:5]
-testY = testY[:,1:5]
+trainY = trainY[:,1:]
+testY = testY[:,1:]
+
+print ("shape after strip BG %s" % str(np.shape(trainY)))
 
 # init an array of regressors, one for each label
 labelCount = np.shape(trainY)[1]
-clfEnsemble = [LinearRegression() for _ in range(labelCount)]
+clfEnsemble = [SVR(kernel='rbf', C=1e3, gamma=0.1) for _ in range(labelCount)]
 
 # train and predict the entire series
 pred = np.zeros(np.shape(testY))
@@ -79,6 +83,8 @@ pred = np.zeros(np.shape(testY))
 for (i,clf) in enumerate(clfEnsemble):
     clf.fit(trainX, trainY[:,i])
     pred[:,i] = clf.predict(testX)
+    
+print(pred)
 
 # declare a container to hold the vector accuracy timeseries
 vecA = []
