@@ -1,7 +1,7 @@
 #!/bin/sh
 
 maDataPath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/MotifsAff"
-prjPath=/Users/michaelwalton/workspace/git/artificial-olfaction
+prjPath=/Users/michaelwalton/workspace/git/artificial-olfaction/python
 
 xTrain=train/sensorActivation.csv
 yTrain=train/concentration.csv
