@@ -14,10 +14,26 @@ def scale(label):
     return np.log(label)
 
 r = 0
+"""
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/sensorActivation.csv"
 ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/concentration.csv"
 xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/sensorActivation.csv"
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/concentration.csv"
+"""
+"""
+xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/sensorActivation.csv"
+ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/concentration.csv"
+xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG2/0.19test/sensorActivation.csv"
+ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG2/0.19test/concentration.csv"
+"""
+
+rootPath='/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/compSig'
+prefix='t1'
+
+xtrainpath=("%s/%strain/sensorActivation.csv" % (rootPath, prefix))
+ytrainpath=("%s/%strain/concentration.csv" % (rootPath, prefix))
+xtestpath=("%s/%stest/sensorActivation.csv" % (rootPath, prefix))
+ytestpath=("%s/%stest/concentration.csv" % (rootPath, prefix))
 
 (Xtrain, ytrain) = loadData(xtrainpath, ytrainpath)
 (Xtest, ytest) = loadData(xtestpath, ytestpath)
