@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.cross_validation import train_test_split
 from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import StratifiedKFold
+from sklearn.cross_validation import KFold
+import time
+from Crypto.Random.random import shuffle
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -22,6 +26,7 @@ def scale(label):
     return np.log10(label)
 
 r = 0
+tune = False
 
 """
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/sensorActivation.csv"
@@ -52,8 +57,8 @@ y = scale(y)
 #y = np.append(y, ytrain, axis=0)
 
 # Split the dataset in two parts
-#Xtrain, X, ytrain, y = train_test_split(
-#    X, y, test_size=0.25, random_state=r)
+Xtrain, X, ytrain, y = train_test_split(
+    X, y, test_size=0.25, random_state=r)
 
 #X = standardize(X)
 #Xtrain = standardize(Xtrain)
@@ -61,7 +66,7 @@ y = scale(y)
 ###############################################################################
 # Fit regression model
 from sklearn.svm import SVR
-svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1, random_state=r)
+#svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1, random_state=r)
 #svr_lin = SVR(kernel='linear', C=1e3)
 #svr_poly = SVR(kernel='poly', C=1e3, degree=2)
 
@@ -70,6 +75,23 @@ y_lin = []
 y_poly = []
 
 for i in range(np.shape(y)[1]):
+    if (tune):
+        print( "Tuning parameters for odorant %s" % i)
+        cv = StratifiedKFold(y=ytrain[:,i], n_folds=10, random_state=r, shuffle=True)
+        # perform a grid search on the 'C' and 'gamma' parameter
+        C_range = [1e3, 1.0, 10.0, 100.0] #2. ** np.arange(-15, 15, step=1)
+        gamma_range = [0.1, 0.001, 0.0001, 0.000001] #2. ** np.arange(-15, 15, step=1)
+    
+        param_grid = dict(gamma=gamma_range, C=C_range)
+        
+        start = time.time()
+        gs = GridSearchCV(SVR(kernel='rbf', epsilon = 0.1, random_state=r), param_grid=param_grid, cv=cv, n_jobs = -1, verbose = 2)
+        gs.fit(Xtrain, ytrain[:,i])
+        
+        svr_rbf = SVR(kernel='rbf', C=gs.best_estimator_.C, gamma=gs.best_estimator_.gamma, random_state=r)
+    else:
+        svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1, random_state=r)
+    
     y_rbf.append(svr_rbf.fit(Xtrain, ytrain[:,i]).predict(X))
     #y_lin.append(svr_lin.fit(Xtrain, ytrain[:,i]).predict(X))
     #y_poly.append(svr_poly.fit(Xtrain, ytrain[:,i]).predict(X))
