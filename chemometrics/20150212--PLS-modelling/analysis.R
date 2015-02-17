@@ -123,4 +123,7 @@ pred.sensor.pcr.10 	<- pred.sensor.pcr[,,10]
 #....
 
 # plot test truth vs test prediction for 1 odorant
-#plot(test.odorants[,1], pred.sensor.pcr.10[,1])
+plot(test.odorants[,1], pred.sensor.pcr.10[,1])
+plot(test.odorants[,2], pred.sensor.pcr.10[,2])
+plot(test.odorants[,3], pred.sensor.pcr.10[,3])
+plot(test.odorants[,4], pred.sensor.pcr.10[,4])

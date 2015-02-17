@@ -5,6 +5,8 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
+from sklearn.cross_validation import train_test_split
+from sklearn.grid_search import GridSearchCV
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -14,6 +16,12 @@ def loadData(XPath, yPath):
 def standardize(featureVector):
     scaler = StandardScaler()
     return scaler.fit_transform(featureVector)
+
+def scale(label):
+    label[label<1e-3]=1e-3
+    return np.log10(label)
+
+r = 0
 
 """
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/sensorActivation.csv"
@@ -31,23 +39,31 @@ ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/d
 (Xtrain, ytrain) = loadData(xtrainpath, ytrainpath)
 (X,y) = loadData(xtestpath, ytestpath)
 
+#trim off background and scale
 ytrain=ytrain[:,1:]
-ytrain[ytrain<1e-3]=1e-3
-ytrain=np.log10(ytrain)
+ytrain=scale(ytrain)
 
+#trim off background and scale
 y = y[:,1:]
-y[y<1e-3]=1e-3
-y=np.log10(y)
+y = scale(y)
+
+# concatenate the entire dataset into a single series
+#X = np.append(X, Xtrain, axis=0)
+#y = np.append(y, ytrain, axis=0)
+
+# Split the dataset in two parts
+#Xtrain, X, ytrain, y = train_test_split(
+#    X, y, test_size=0.25, random_state=r)
 
 #X = standardize(X)
-#asdfdfXtrain = standardize(Xtrain)
+#Xtrain = standardize(Xtrain)
 
 ###############################################################################
 # Fit regression model
 from sklearn.svm import SVR
-svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1)
-svr_lin = SVR(kernel='linear', C=1e3)
-svr_poly = SVR(kernel='poly', C=1e3, degree=2)
+svr_rbf = SVR(kernel='rbf', C=1e3, gamma=0.1, random_state=r)
+#svr_lin = SVR(kernel='linear', C=1e3)
+#svr_poly = SVR(kernel='poly', C=1e3, degree=2)
 
 y_rbf = []
 y_lin = []
@@ -55,8 +71,8 @@ y_poly = []
 
 for i in range(np.shape(y)[1]):
     y_rbf.append(svr_rbf.fit(Xtrain, ytrain[:,i]).predict(X))
-    y_lin.append(svr_lin.fit(Xtrain, ytrain[:,i]).predict(X))
-    y_poly.append(svr_poly.fit(Xtrain, ytrain[:,i]).predict(X))
+    #y_lin.append(svr_lin.fit(Xtrain, ytrain[:,i]).predict(X))
+    #y_poly.append(svr_poly.fit(Xtrain, ytrain[:,i]).predict(X))
 
 ###############################################################################
 # do RMSEs for the models
@@ -65,20 +81,20 @@ lin_rmse=[]
 poly_rmse=[]
 
 rbf_rmse.append(sqrt(mean_squared_error(y[:,0], y_rbf[0])))
-lin_rmse.append(sqrt(mean_squared_error(y[:,0], y_lin[0])))
-poly_rmse.append(sqrt(mean_squared_error(y[:,0], y_poly[0])))
+#lin_rmse.append(sqrt(mean_squared_error(y[:,0], y_lin[0])))
+#poly_rmse.append(sqrt(mean_squared_error(y[:,0], y_poly[0])))
 
 rbf_rmse.append(sqrt(mean_squared_error(y[:,1], y_rbf[1])))
-lin_rmse.append(sqrt(mean_squared_error(y[:,1], y_lin[1])))
-poly_rmse.append(sqrt(mean_squared_error(y[:,1], y_poly[1])))
+#lin_rmse.append(sqrt(mean_squared_error(y[:,1], y_lin[1])))
+#poly_rmse.append(sqrt(mean_squared_error(y[:,1], y_poly[1])))
 
 rbf_rmse.append(sqrt(mean_squared_error(y[:,2], y_rbf[2])))
-lin_rmse.append(sqrt(mean_squared_error(y[:,2], y_lin[2])))
-poly_rmse.append(sqrt(mean_squared_error(y[:,2], y_poly[2])))
+#lin_rmse.append(sqrt(mean_squared_error(y[:,2], y_lin[2])))
+#poly_rmse.append(sqrt(mean_squared_error(y[:,2], y_poly[2])))
 
 rbf_rmse.append(sqrt(mean_squared_error(y[:,3], y_rbf[3])))
-lin_rmse.append(sqrt(mean_squared_error(y[:,3], y_lin[3])))
-poly_rmse.append(sqrt(mean_squared_error(y[:,3], y_poly[3])))
+#lin_rmse.append(sqrt(mean_squared_error(y[:,3], y_lin[3])))
+#poly_rmse.append(sqrt(mean_squared_error(y[:,3], y_poly[3])))
 
 ###############################################################################
 # plot results
