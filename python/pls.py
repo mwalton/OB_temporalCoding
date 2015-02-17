@@ -20,12 +20,12 @@ def standardize(featureVector):
     return scaler.fit_transform(featureVector)
 
 r = 0
-
+"""
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/sensorActivation.csv"
 ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/concentration.csv"
 xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/sensorActivation.csv"
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/concentration.csv"
-
+"""
 """
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/sensorActivation.csv"
 ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/concentration.csv"
@@ -33,15 +33,15 @@ xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/d
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG2/0.19test/concentration.csv"
 """
 
-"""
+
 rootPath='/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/compSig'
-prefix='t1'
+prefix='t5'
 
 xtrainpath=("%s/%strain/sensorActivation.csv" % (rootPath, prefix))
 ytrainpath=("%s/%strain/concentration.csv" % (rootPath, prefix))
 xtestpath=("%s/%stest/sensorActivation.csv" % (rootPath, prefix))
 ytestpath=("%s/%stest/concentration.csv" % (rootPath, prefix))
-"""
+
 
 (Xtrain, ytrain) = loadData(xtrainpath, ytrainpath)
 (Xtest, ytest) = loadData(xtestpath, ytestpath)
@@ -56,8 +56,11 @@ ytest = ytest[:,1:]
 #ytest = scale(ytest)
 Xtest = standardize(Xtest)
 
-pls = PLSRegression(n_components=20)
-y_pls = pls.fit(Xtrain, ytrain).predict(Xtest)
+pls = PLSRegression(n_components=10)
+pls.fit(Xtrain, ytrain)
+y_pls = pls.predict(Xtest)
+print 1 + pls.score(Xtest, ytest)
+
 
 pls_rmse=[]
 pls_rmse.append(sqrt(mean_squared_error(ytest[:,0], y_pls[:,0])))
@@ -69,8 +72,6 @@ fig = plt.figure(figsize=(20,10))
 
 ax1 = fig.add_subplot(241)
 ax1.plot(y_pls[:,0], c='r', label='PLS Fit')
-#ax1.plot(y_lin[0], c='r', label='Linear Fit')
-#ax1.plot(y_poly[0], c='b', label='Poly Fit')
 ax1.plot(ytest[:,0], c='grey', label='Target')
 ax1.set_xlabel('Time')
 ax1.set_ylabel('[c]')
@@ -80,11 +81,8 @@ ax1.legend()
 
 ax2 = fig.add_subplot(242)
 ax2.plot(y_pls[:,1], c='g', label='PLS Fit')
-#ax2.plot(y_lin[1], c='r', label='Linear Fit')
-#ax2.plot(y_poly[1], c='b', label='Poly Fit')
 ax2.plot(ytest[:,1], c='grey', label='Target')
 ax2.set_xlabel('Time')
-#ax2.set_ylabel('log[c]')
 ax2.set_title('GREEN')
 ax2.legend()
 

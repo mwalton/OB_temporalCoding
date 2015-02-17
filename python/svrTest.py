@@ -11,6 +11,7 @@ from sklearn.cross_validation import StratifiedKFold
 from sklearn.cross_validation import KFold
 import time
 from Crypto.Random.random import shuffle
+from sklearn.decomposition import PCA
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -22,9 +23,12 @@ def standardize(featureVector):
     return scaler.fit_transform(featureVector)
 
 def scale(label):
-    #label[label<1e-3]=1e-3
-    #return np.log10(label)
-    return np.power(label, 0.25)
+    label[label<1e-3]=1e-3
+    return np.log10(label)
+    #return np.power(label, 0.25)
+
+def whiten(features, y=None):
+    return PCA(n_components=4, whiten=True).fit_transform(features, y)
 
 r = 0
 tune = False
@@ -35,21 +39,21 @@ ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/
 xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG2/0.19test/sensorActivation.csv"
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG2/0.19test/concentration.csv"
 """
-
+"""
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/sensorActivation.csv"
 ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/concentration.csv"
 xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/sensorActivation.csv"
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/concentration.csv"
-
 """
+
 rootPath='/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/compSig'
-prefix='t5'
+prefix='t40'
 
 xtrainpath=("%s/%strain/sensorActivation.csv" % (rootPath, prefix))
 ytrainpath=("%s/%strain/concentration.csv" % (rootPath, prefix))
 xtestpath=("%s/%stest/sensorActivation.csv" % (rootPath, prefix))
 ytestpath=("%s/%stest/concentration.csv" % (rootPath, prefix))
-"""
+
 
 (Xtrain, ytrain) = loadData(xtrainpath, ytrainpath)
 (X,y) = loadData(xtestpath, ytestpath)
@@ -64,6 +68,9 @@ y = scale(y)
 
 #Xtrain = standardize(Xtrain)
 #X = standardize(X)
+
+#Xtrain = whiten(Xtrain)
+#X = whiten(X)
 
 # concatenate the entire dataset into a single series
 #X = np.append(X, Xtrain, axis=0)
