@@ -3,6 +3,7 @@ from sklearn.cross_decomposition import PLSRegression
 import matplotlib.pyplot as plt
 from math import sqrt
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import StandardScaler
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -10,16 +11,21 @@ def loadData(XPath, yPath):
     return (X, y)
 
 def scale(label):
-    label[label<1e-3]=1e-3
-    return np.log(label)
+    #label[label<1e-10]=1e-10
+    return np.power(label, 0.25)
+    #return np.log10(label)
+
+def standardize(featureVector):
+    scaler = StandardScaler()
+    return scaler.fit_transform(featureVector)
 
 r = 0
-"""
+
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/sensorActivation.csv"
 ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/concentration.csv"
 xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/sensorActivation.csv"
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/concentration.csv"
-"""
+
 """
 xtrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/sensorActivation.csv"
 ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG1/0.01train/concentration.csv"
@@ -27,6 +33,7 @@ xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/d
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/BGtest/BG2/0.19test/concentration.csv"
 """
 
+"""
 rootPath='/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/compSig'
 prefix='t1'
 
@@ -34,6 +41,7 @@ xtrainpath=("%s/%strain/sensorActivation.csv" % (rootPath, prefix))
 ytrainpath=("%s/%strain/concentration.csv" % (rootPath, prefix))
 xtestpath=("%s/%stest/sensorActivation.csv" % (rootPath, prefix))
 ytestpath=("%s/%stest/concentration.csv" % (rootPath, prefix))
+"""
 
 (Xtrain, ytrain) = loadData(xtrainpath, ytrainpath)
 (Xtest, ytest) = loadData(xtestpath, ytestpath)
@@ -41,12 +49,14 @@ ytestpath=("%s/%stest/concentration.csv" % (rootPath, prefix))
 #trim off background and scale
 ytrain=ytrain[:,1:]
 #ytrain=scale(ytrain)
+Xtrain=standardize(Xtrain)
 
 #trim off background and scale
 ytest = ytest[:,1:]
 #ytest = scale(ytest)
+Xtest = standardize(Xtest)
 
-pls = PLSRegression(n_components=10)
+pls = PLSRegression(n_components=20)
 y_pls = pls.fit(Xtrain, ytrain).predict(Xtest)
 
 pls_rmse=[]

@@ -22,8 +22,9 @@ def standardize(featureVector):
     return scaler.fit_transform(featureVector)
 
 def scale(label):
-    label[label<1e-3]=1e-3
-    return np.log10(label)
+    #label[label<1e-3]=1e-3
+    #return np.log10(label)
+    return np.power(label, 0.25)
 
 r = 0
 tune = False
@@ -40,6 +41,15 @@ ytrainpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/
 xtestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/sensorActivation.csv"
 ytestpath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/concentration.csv"
 
+"""
+rootPath='/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/compSig'
+prefix='t5'
+
+xtrainpath=("%s/%strain/sensorActivation.csv" % (rootPath, prefix))
+ytrainpath=("%s/%strain/concentration.csv" % (rootPath, prefix))
+xtestpath=("%s/%stest/sensorActivation.csv" % (rootPath, prefix))
+ytestpath=("%s/%stest/concentration.csv" % (rootPath, prefix))
+"""
 
 (Xtrain, ytrain) = loadData(xtrainpath, ytrainpath)
 (X,y) = loadData(xtestpath, ytestpath)
@@ -52,13 +62,16 @@ ytrain=scale(ytrain)
 y = y[:,1:]
 y = scale(y)
 
+#Xtrain = standardize(Xtrain)
+#X = standardize(X)
+
 # concatenate the entire dataset into a single series
 #X = np.append(X, Xtrain, axis=0)
 #y = np.append(y, ytrain, axis=0)
 
 # Split the dataset in two parts
-Xtrain, X, ytrain, y = train_test_split(
-    X, y, test_size=0.25, random_state=r)
+#Xtrain, X, ytrain, y = train_test_split(
+#    X, y, test_size=0.25, random_state=r)
 
 #X = standardize(X)
 #Xtrain = standardize(Xtrain)
