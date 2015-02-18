@@ -41,6 +41,15 @@ def vector_accuracy(v1, v2):
     v2_u = unit_vector(v2)
     return np.dot(v1_u, v2_u)
 
+def avg_va(v1, v2, minC):
+    # declare a container to hold the vector accuracy timeseries
+    vecA = []
+    
+    # for each timestep, if at least minEvalC is present, compute vector_accuracy
+    for i in range(np.shape(testY)[0]):
+        if (np.argmax(testY[i,:]) > minC):
+            vecA.append(vector_accuracy(pred[i,:], testY[i,:]))
+
 # parsed CL args
 ap = argparse.ArgumentParser()
 ap.add_argument("-x", "--xTrain", required = True,

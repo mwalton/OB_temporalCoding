@@ -23,6 +23,43 @@ def standardize(featureVector):
     scaler = StandardScaler()
     return scaler.fit_transform(featureVector)
 
+
+# model prediction assessment functions
+def unit_vector(vector):
+    """ Returns the unit vector of the input.  """
+    return vector / np.linalg.norm(vector)
+
+"""computes the angle between two vectors in radians"""
+def angle_between(v1, v2):
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    angle = np.arccos(np.dot(v1_u, v2_u))
+    if np.isnan(angle):
+        if (v1_u == v2_u).all():
+            return 0.0
+        else:
+            return np.pi
+    return angle
+
+"""computes the accuracy given a target and a prediciton vector"""
+def vector_accuracy(v1, v2):
+    #radAngle = angle_between(v1, v2)
+    #return 1 - (np.degrees(radAngle) / 90)
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.dot(v1_u, v2_u)
+
+def avg_va(yPred, yTrue, minC):
+    # declare a container to hold the vector accuracy timeseries
+    vecA = []
+    
+    # for each timestep, if at least minEvalC is present, compute vector_accuracy
+    for i in range(np.shape(yTrue)[0]):
+        if (np.argmax(yTrue[i,:]) > minC):
+            vecA.append(vector_accuracy(yPred[i,:], yTrue[i,:]))
+            
+    return np.mean(vecA, dtype=float)
+
 if(platform.system() == 'Darwin'):
     basePath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle"
 else:
@@ -78,6 +115,8 @@ else:
     exp.network.save("mdl.pkl")
 
 y_pls=exp.network.predict(Xtest)
+
+print("Normalized VA: %s\n" % avg_va(y_pls, ytest, 0.001))
 
 pls_rmse=[]
 pls_rmse.append(sqrt(mean_squared_error(ytest[:,0], y_pls[:,0])))
