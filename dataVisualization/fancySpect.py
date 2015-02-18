@@ -23,8 +23,6 @@ ytrainpath=path.join(basePath, "m5a5train/concentration.csv")
 xtestpath=path.join(basePath, "m5a5test/sensorActivation.csv")
 ytestpath=path.join(basePath, "m5a5test/concentration.csv")
 
-
-
 # odorant label ranges
 oRange = {'red' : [0,399], 'green' : [400,799], 'blue' : [800,1199], 'yellow' : [1200,1599]}
 
