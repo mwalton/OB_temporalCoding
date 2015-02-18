@@ -118,13 +118,11 @@ y_pls=exp.network.predict(Xtest)
 
 print("Normalized VA: %s\n" % avg_va(y_pls, ytest, 0.001))
 
-print("RMSE: %s\n" % mean_squared_error(ytest, y_pls))
-
 pls_rmse=[]
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,0], y_pls[:,0])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,1], y_pls[:,1])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,2], y_pls[:,2])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,3], y_pls[:,3])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,0], y_pls[:,0])))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,1], y_pls[:,1])))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,2], y_pls[:,2])))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,3], y_pls[:,3])))
 
 fig = plt.figure(figsize=(20,10))
 
