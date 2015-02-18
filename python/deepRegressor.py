@@ -39,8 +39,8 @@ ytestpath=path.join(basePath, "paul_highC_BG1/test/concentration.csv")
 ytest=ytest[:,1:]
 ytrain=ytrain[:,1:]
 
-Xtrain=standardize(Xtrain)
-Xtest=standardize(Xtest)
+#Xtrain=standardize(Xtrain)
+#Xtest=standardize(Xtest)
 
 ytrain=scale(ytrain)
 ytest=scale(ytest)
