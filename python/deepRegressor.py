@@ -2,11 +2,12 @@ import climate
 import theanets
 import numpy as np
 from sklearn.cross_validation import train_test_split
-from os.path import isfile
+from os import path
 from math import sqrt
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
+import platform
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -22,10 +23,15 @@ def standardize(featureVector):
     scaler = StandardScaler()
     return scaler.fit_transform(featureVector)
 
-xtrainpath="/home/myke/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/sensorActivation.csv"
-ytrainpath="/home/myke/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_medC_BG2/train/concentration.csv"
-xtestpath="/home/myke/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/sensorActivation.csv"
-ytestpath="/home/myke/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle/paul_highC_BG1/test/concentration.csv"
+if(platform.system() == 'Darwin'):
+    basePath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle"
+else:
+    basePath="/home/myke/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle"
+
+xtrainpath=path.join(basePath, "paul_medC_BG2/train/sensorActivation.csv")
+ytrainpath=path.join(basePath, "paul_medC_BG2/train/concentration.csv")
+xtestpath=path.join(basePath, "paul_highC_BG1/test/sensorActivation.csv")
+ytestpath=path.join(basePath, "paul_highC_BG1/test/concentration.csv")
 
 (Xtrain, ytrain) = loadData(xtrainpath, ytrainpath)
 (Xtest, ytest) = loadData(xtestpath, ytestpath)
@@ -55,7 +61,7 @@ exp = theanets.Experiment(
     #hidden_l1=0.1,
 )
 
-if (isfile("mdl.pkl")):
+if (path.isfile("mdl.pkl")):
     print "loading model from file"
     exp.load("mdl.pkl")
 else:
