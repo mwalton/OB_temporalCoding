@@ -118,11 +118,13 @@ y_pls=exp.network.predict(Xtest)
 
 print("Normalized VA: %s\n" % avg_va(y_pls, ytest, 0.001))
 
+print("RMSE: %s\n" % mean_squared_error(ytest, y_pls))
+
 pls_rmse=[]
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,0], y_pls[:,0])))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,1], y_pls[:,1])))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,2], y_pls[:,2])))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,3], y_pls[:,3])))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,0], y_pls[:,0])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,1], y_pls[:,1])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,2], y_pls[:,2])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
+pls_rmse.append(sqrt(mean_squared_error(ytest[:,3], y_pls[:,3])) / (np.max(ytest[:,0] - np.min(ytest[:,0]))))
 
 fig = plt.figure(figsize=(20,10))
 
@@ -163,7 +165,7 @@ ax4.set_title('YELLOW')
 ax4.legend()
 
 ax5 = fig.add_subplot(245)
-ax5.scatter(ytest[:,0], y_pls[:,0], c='r', label=('NN RMSE=%0.2f' % pls_rmse[0]))
+ax5.scatter(ytest[:,0], y_pls[:,0], c='r', label=('NN nRMSE=%0.2f' % pls_rmse[0]))
 #ax5.scatter(y[:,0], y_lin[0], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[0]))
 #ax5.scatter(y[:,0], y_poly[0], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[0]))
 ax5.plot(ytest[:,0],ytest[:,0],c='grey')
@@ -173,7 +175,7 @@ ax5.set_ylabel('Actual')
 ax5.legend()
 
 ax6 = fig.add_subplot(246)
-ax6.scatter(ytest[:,1], y_pls[:,1], c='g', label=('NN RMSE=%0.2f' % pls_rmse[1]))
+ax6.scatter(ytest[:,1], y_pls[:,1], c='g', label=('NN nRMSE=%0.2f' % pls_rmse[1]))
 #ax6.scatter(y[:,1], y_lin[1], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[1]))
 #ax6.scatter(y[:,1], y_poly[1], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[1]))
 ax6.plot(ytest[:,1],ytest[:,1],c='grey')
@@ -183,7 +185,7 @@ ax6.set_xlabel('Prediction')
 ax6.legend()
 
 ax7 = fig.add_subplot(247)
-ax7.scatter(ytest[:,2], y_pls[:,2], c='b', label=('NN RMSE=%0.2f' % pls_rmse[2]))
+ax7.scatter(ytest[:,2], y_pls[:,2], c='b', label=('NN nRMSE=%0.2f' % pls_rmse[2]))
 #ax7.scatter(y[:,2], y_lin[2], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[2]))
 #ax7.scatter(y[:,2], y_poly[2], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[2]))
 ax7.plot(ytest[:,2],ytest[:,2],c='grey')
@@ -193,7 +195,7 @@ ax7.set_xlabel('Prediction')
 ax7.legend()
 
 ax8 = fig.add_subplot(248)
-ax8.scatter(ytest[:,3], y_pls[:,3], c='y', label=('NN RMSE=%0.2f' % pls_rmse[3]))
+ax8.scatter(ytest[:,3], y_pls[:,3], c='y', label=('NN nRMSE=%0.2f' % pls_rmse[3]))
 #ax8.scatter(y[:,3], y_lin[3], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[3]))
 #ax8.scatter(y[:,3], y_poly[3], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[3]))
 ax8.plot(ytest[:,3],ytest[:,3],c='grey')
