@@ -94,7 +94,7 @@ climate.enable_default_logging()
 
 exp = theanets.Experiment(
     theanets.Regressor,
-    layers=(100, 200, 4),
+    layers=(100, 50, 4),
     #hidden_l1=0.1,
 )
 
@@ -103,7 +103,27 @@ if (path.isfile("mdl.pkl")):
     exp.load("mdl.pkl")
 else:
     print "training network"
-
+    
+    t_loss=[]
+    v_loss=[]
+    
+    trainer = exp.itertrain(training_data, validation_data, optimize='sgd')
+    for t in trainer:
+        (train,valid) = t
+        t_loss.append(train['loss'])
+        v_loss.append(valid['loss'])
+    
+    fig = plt.figure(figsize=(10,10))
+    ax1 = fig.add_subplot(111)
+    ax1.plot(t_loss, c='r', label='Training')
+    ax1.plot(v_loss, c='b', label='Validation')
+    ax1.set_xlabel('batch')
+    ax1.set_ylabel('loss')
+    #ax1.set_yscale('log')
+    ax1.legend()
+    plt.show()
+    
+    """
     exp.train(
         training_data,
         validation_data,
@@ -111,7 +131,7 @@ else:
         #learning_rate=0.01,
         #momentum=0.5,
     )
-
+    """
     exp.network.save("mdl.pkl")
 
 y_pls=exp.network.predict(Xtest)
