@@ -92,112 +92,44 @@ test_data = [Xtest, ytest]
 
 climate.enable_default_logging()
 
-exp = theanets.Experiment(
-    theanets.Regressor,
-    layers=(100, 50, 4),
-    #hidden_l1=0.1,
-)
+hiddenLayerRange = [10,20,30,40,50]
+lr_range = [1e-4,1e-3,1e-2,1e-1,1]
+momentum_range = [0.5,0.6,0.7,0.8,0.9]
 
+va = np.zeros((len(hiddenLayerRange),len(lr_range)))
+
+for i, hl in enumerate(hiddenLayerRange):
+    for j, lr in enumerate(lr_range):
+        exp = theanets.Experiment(
+            theanets.Regressor,
+            layers=(100, hl, 4),
+            #hidden_l1=0.1,
+        )
+        
+        exp.train(
+            training_data,
+            validation_data,
+            optimize='sgd',
+            learning_rate=lr,
+            #momentum=0.5,
+        )
+        
+        y_pls=exp.network.predict(Xtest)
+        
+        va[i,j] = avg_va(y_pls, ytest, 0.001)
+"""
 if (path.isfile("mdl.pkl")):
     print "loading model from file"
     exp.load("mdl.pkl")
 else:
     print "training network"
-    
-    exp.train(
-        training_data,
-        validation_data,
-        optimize='sgd',
-        #learning_rate=0.01,
-        #momentum=0.5,
-    )
+"""
 
-y_pls=exp.network.predict(Xtest)
+fig = plt.figure(figsize=(10,10))
 
-print("Normalized VA: %s\n" % avg_va(y_pls, ytest, 0.001))
-
-pls_rmse=[]
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,0], y_pls[:,0])))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,1], y_pls[:,1])))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,2], y_pls[:,2])))
-pls_rmse.append(sqrt(mean_squared_error(ytest[:,3], y_pls[:,3])))
-
-fig = plt.figure(figsize=(20,10))
-
-ax1 = fig.add_subplot(241)
-ax1.plot(y_pls[:,0], c='r', label='NN Fit')
-ax1.plot(ytest[:,0], c='grey', label='Target')
-ax1.set_xlabel('Time')
-ax1.set_ylabel('[c]')
-#ax1.set_yscale('log')
-ax1.set_title('RED')
-ax1.legend()
-
-ax2 = fig.add_subplot(242)
-ax2.plot(y_pls[:,1], c='g', label='NN Fit')
-ax2.plot(ytest[:,1], c='grey', label='Target')
-ax2.set_xlabel('Time')
-ax2.set_title('GREEN')
-ax2.legend()
-
-ax3 = fig.add_subplot(243)
-ax3.plot(y_pls[:,2], c='b', label='NN Fit')
-#ax3.plot(y_lin[2], c='r', label='Linear Fit')
-#ax3.plot(y_poly[2], c='b', label='Poly Fit')
-ax3.plot(ytest[:,2], c='grey', label='Target')
-ax3.set_xlabel('Time')
-#ax3.set_ylabel('log[c]')
-ax3.set_title('BLUE')
-ax3.legend()
-
-ax4 = fig.add_subplot(244)
-ax4.plot(y_pls[:,3], c='y', label='NN Fit')
-#ax4.plot(y_lin[3], c='r', label='Linear Fit')
-#ax4.plot(y_poly[3], c='b', label='Poly Fit')
-ax4.plot(ytest[:,3], c='grey', label='Target')
-ax4.set_xlabel('Time')
-#ax4.set_ylabel('log[c]')
-ax4.set_title('YELLOW')
-ax4.legend()
-
-ax5 = fig.add_subplot(245)
-ax5.scatter(ytest[:,0], y_pls[:,0], c='r', label=('NN nRMSE=%0.2f' % pls_rmse[0]))
-#ax5.scatter(y[:,0], y_lin[0], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[0]))
-#ax5.scatter(y[:,0], y_poly[0], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[0]))
-ax5.plot(ytest[:,0],ytest[:,0],c='grey')
-ax5.set_xlim(np.min(ytest[:,0]), np.max(ytest[:,0]))
-ax5.set_xlabel('Prediction')
-ax5.set_ylabel('Actual')
-ax5.legend()
-
-ax6 = fig.add_subplot(246)
-ax6.scatter(ytest[:,1], y_pls[:,1], c='g', label=('NN nRMSE=%0.2f' % pls_rmse[1]))
-#ax6.scatter(y[:,1], y_lin[1], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[1]))
-#ax6.scatter(y[:,1], y_poly[1], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[1]))
-ax6.plot(ytest[:,1],ytest[:,1],c='grey')
-ax6.set_xlim(np.min(ytest[:,1]), np.max(ytest[:,1]))
-ax6.set_xlabel('Prediction')
-#ax6.set_ylabel('Actual')
-ax6.legend()
-
-ax7 = fig.add_subplot(247)
-ax7.scatter(ytest[:,2], y_pls[:,2], c='b', label=('NN nRMSE=%0.2f' % pls_rmse[2]))
-#ax7.scatter(y[:,2], y_lin[2], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[2]))
-#ax7.scatter(y[:,2], y_poly[2], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[2]))
-ax7.plot(ytest[:,2],ytest[:,2],c='grey')
-ax7.set_xlim(np.min(ytest[:,2]), np.max(ytest[:,2]))
-ax7.set_xlabel('Prediction')
-#ax7.set_ylabel('Actual')
-ax7.legend()
-
-ax8 = fig.add_subplot(248)
-ax8.scatter(ytest[:,3], y_pls[:,3], c='y', label=('NN nRMSE=%0.2f' % pls_rmse[3]))
-#ax8.scatter(y[:,3], y_lin[3], c='r', label=('Linear RMSE=%0.2f' % lin_rmse[3]))
-#ax8.scatter(y[:,3], y_poly[3], c='b', label=('Polynomial RMSE=%0.2f' % poly_rmse[3]))
-ax8.plot(ytest[:,3],ytest[:,3],c='grey')
-ax8.set_xlim(np.min(ytest[:,3]), np.max(ytest[:,3]))
-ax8.set_xlabel('Prediction')
-#ax8.set_ylabel('Actual')
-ax8.legend()
+ax1 = fig.add_subplot(111)
+ax1.imshow(va, aspect='auto', interpolation='nearest')
+ax1.set_xlabel('Hidden Layer')
+ax1.set_ylabel('Learning Rate')
 
 plt.show()
