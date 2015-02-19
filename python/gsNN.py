@@ -92,44 +92,43 @@ test_data = [Xtest, ytest]
 
 climate.enable_default_logging()
 
-hiddenLayerRange = [10,20,30,40,50]
-lr_range = [1e-4,1e-3,1e-2,1e-1,1]
-momentum_range = [0.5,0.6,0.7,0.8,0.9]
+hiddenLayerRange = range(10,200,10)
+lr_range = np.linspace(0.01,1)
+momentum_range = np.linspace(0.01,1)
 
-va = np.zeros((len(hiddenLayerRange),len(lr_range)))
-
-for i, hl in enumerate(hiddenLayerRange):
-    for j, lr in enumerate(lr_range):
-        exp = theanets.Experiment(
-            theanets.Regressor,
-            layers=(100, hl, 4),
-            #hidden_l1=0.1,
-        )
-        
-        exp.train(
-            training_data,
-            validation_data,
-            optimize='sgd',
-            learning_rate=lr,
-            #momentum=0.5,
-        )
-        
-        y_pls=exp.network.predict(Xtest)
-        
-        va[i,j] = avg_va(y_pls, ytest, 0.001)
-"""
-if (path.isfile("mdl.pkl")):
-    print "loading model from file"
-    exp.load("mdl.pkl")
+if (path.isfile("va.npy")):
+    va = np.load("va.npy")
 else:
-    print "training network"
-"""
+    va = np.zeros((len(momentum_range),len(lr_range)))
+
+    for i, m in enumerate(momentum_range):
+        for j, lr in enumerate(lr_range):
+            exp = theanets.Experiment(
+                theanets.Regressor,
+                layers=(100, 100, 4),
+                #hidden_l1=0.1,
+            )
+            
+            exp.train(
+                training_data,
+                validation_data,
+                optimize='sgd',
+                learning_rate=lr,
+                momentum=m,
+            )
+            
+            y_pls=exp.network.predict(Xtest)
+            
+            va[i,j] = avg_va(y_pls, ytest, 0.001)
+
+            np.save("va.npy", va)
+
 
 fig = plt.figure(figsize=(10,10))
 
 ax1 = fig.add_subplot(111)
-ax1.imshow(va, aspect='auto', interpolation='nearest')
-ax1.set_xlabel('Hidden Layer')
+ax1.imshow(va, extent=[hiddenLayerRange[0],hiddenLayerRange[-1],momentum_range[0],momentum_range[-1]], aspect='auto', interpolation='nearest')
+ax1.set_xlabel('Momentum')
 ax1.set_ylabel('Learning Rate')
 
 plt.show()
