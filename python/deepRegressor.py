@@ -98,11 +98,6 @@ exp = theanets.Experiment(
     #hidden_l1=0.1,
 )
 
-trainer = exp.itertrain(training_data, validation_data, optimize='sgd')
-(train,valid) = next(trainer)
-print train
-print valid
-
 if (path.isfile("mdl.pkl")):
     print "loading model from file"
     exp.load("mdl.pkl")
