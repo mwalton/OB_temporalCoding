@@ -62,8 +62,10 @@ def avg_va(yPred, yTrue, minC):
 
 if(platform.system() == 'Darwin'):
     basePath="/Users/michaelwalton/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle"
+    outputPath="/Users/michaelwalton/Dropbox/Evolved Machines 2015/Machine Learning/Models"
 else:
     basePath="/home/myke/Dropbox/Evolved Machines 2014/Machine Learning/datasets/kaggle"
+    outputPath="/home/myke/Dropbox/Evolved Machines 2015/Machine Learning/Models"
 
 xtrainpath=path.join(basePath, "paul_medC_BG2/train/sensorActivation.csv")
 ytrainpath=path.join(basePath, "paul_medC_BG2/train/concentration.csv")
@@ -98,8 +100,8 @@ momentum_range = np.linspace(start=0.01,stop=0.5,num=25)
 
 print np.shape(lr_range)
 
-if (path.isfile("va.npy")):
-    va = np.load("va.npy")
+if (path.isfile(path.join(outputPath,"va.npy"))):
+    va = np.load(path.join(outputPath,"va.npy"))
 else:
     va = np.zeros((len(momentum_range),len(lr_range)))
 
@@ -123,7 +125,7 @@ else:
             
             va[i,j] = avg_va(y_pls, ytest, 0.001)
 
-            np.save("va.npy", va)
+            np.save(path.join(outputPath,"va.npy"), va)
 
 
 fig = plt.figure(figsize=(10,10))
