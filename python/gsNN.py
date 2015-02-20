@@ -93,8 +93,10 @@ test_data = [Xtest, ytest]
 climate.enable_default_logging()
 
 hiddenLayerRange = range(10,200,10)
-lr_range = np.linspace(0.01,1)
-momentum_range = np.linspace(0.01,1)
+lr_range = np.linspace(start=0.01,stop=0.5,num=25)
+momentum_range = np.linspace(start=0.01,stop=0.5,num=25)
+
+print np.shape(lr_range)
 
 if (path.isfile("va.npy")):
     va = np.load("va.npy")
@@ -105,7 +107,7 @@ else:
         for j, lr in enumerate(lr_range):
             exp = theanets.Experiment(
                 theanets.Regressor,
-                layers=(100, 100, 4),
+                layers=(100, 25, 4),
                 #hidden_l1=0.1,
             )
             
