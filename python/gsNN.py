@@ -3,11 +3,11 @@ import theanets
 import numpy as np
 from sklearn.cross_validation import train_test_split
 from os import path
-from math import sqrt
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 import platform
+from scipy.ndimage.filters import gaussian_filter
+from mpl_toolkits.mplot3d import Axes3D
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -98,8 +98,6 @@ hiddenLayerRange = range(10,200,10)
 lr_range = np.linspace(start=0.01,stop=0.5,num=25)
 momentum_range = np.linspace(start=0.01,stop=0.5,num=25)
 
-print np.shape(lr_range)
-
 if (path.isfile(path.join(outputPath,"va.npy"))):
     va = np.load(path.join(outputPath,"va.npy"))
 else:
@@ -126,6 +124,8 @@ else:
             va[i,j] = avg_va(y_pls, ytest, 0.001)
 
             np.save(path.join(outputPath,"va.npy"), va)
+
+print va
 
 # convolve the kernel with the data
 #va = scipy.signal.convolve2d(va, kernel, mode='same')
