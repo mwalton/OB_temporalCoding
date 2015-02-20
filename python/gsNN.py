@@ -8,12 +8,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 import platform
-#from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d import axes3d
-from matplotlib import cm
-from scipy import interpolate
-import scipy.signal
-from scipy.ndimage.filters import gaussian_filter
 
 def loadData(XPath, yPath):
     X = np.genfromtxt(XPath, delimiter=",", dtype="float32")
@@ -103,11 +97,6 @@ climate.enable_default_logging()
 hiddenLayerRange = range(10,200,10)
 lr_range = np.linspace(start=0.01,stop=0.5,num=25)
 momentum_range = np.linspace(start=0.01,stop=0.5,num=25)
-<<<<<<< HEAD
-=======
-
-print np.shape(lr_range)
->>>>>>> branch 'master' of https://github.com/mwalton/artificial-olfaction.git
 
 print np.shape(lr_range)
 
@@ -137,16 +126,6 @@ else:
             va[i,j] = avg_va(y_pls, ytest, 0.001)
 
             np.save(path.join(outputPath,"va.npy"), va)
-
-
-momentum_range=momentum_range[:25]
-lr_range=lr_range[:25]
-va=va[:25,:25]
-
-# pyramid kernel
-t = 1 - np.abs(np.linspace(-1, 1, 5))
-kernel = t.reshape(5, 1) * t.reshape(1, 5)
-kernel /= kernel.sum()
 
 # convolve the kernel with the data
 #va = scipy.signal.convolve2d(va, kernel, mode='same')
