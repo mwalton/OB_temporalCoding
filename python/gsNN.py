@@ -103,6 +103,11 @@ climate.enable_default_logging()
 hiddenLayerRange = range(10,200,10)
 lr_range = np.linspace(start=0.01,stop=0.5,num=25)
 momentum_range = np.linspace(start=0.01,stop=0.5,num=25)
+<<<<<<< HEAD
+=======
+
+print np.shape(lr_range)
+>>>>>>> branch 'master' of https://github.com/mwalton/artificial-olfaction.git
 
 print np.shape(lr_range)
 
